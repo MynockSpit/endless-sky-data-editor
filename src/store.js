@@ -15,4 +15,8 @@ function getQuery(inputKey) {
   return ''
 }
 
-export const [useInput, setInput] = makeStateHook(getQuery('search'))
+export const [useInput, setInput, getInput] = makeStateHook(getQuery('search'))
+
+export const [useLineMeta, setLineMeta, getLineMeta] = makeStateHook({
+  // [id]: { show: true }
+})

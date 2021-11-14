@@ -1,6 +1,9 @@
 import { css } from '@emotion/css'
-import React, { useState } from 'react'
-import { setInput } from './store';
+import React from 'react'
+import { Popup } from './Popup';
+import { Icon } from './Icon';
+import { useSearchNavigate } from '../misc';
+import _ from 'lodash'
 
 function resourceCount(inputLines) {
   let count = 0
@@ -10,27 +13,16 @@ function resourceCount(inputLines) {
   return count
 }
 
-function searchUrl(query, go = true) {
-  var nextUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + `?search=${query}`;
-
-  if (window.history.pushState && go) {
-    window.history.pushState({ path: nextUrl }, '', nextUrl);
-  }
-
-  if (go) {
-    setInput(query)
-  }
-
-  return nextUrl
-}
-
 export const Toolbar = ({ value, entries }) => {
+  const navigate = useSearchNavigate()
+
   return (
     <div className={css`
       position: sticky;
       top: 0px;
       background: white;
       padding: 6px;
+      z-index: 1;
     `}>
       <div className={css`
         display: flex;
@@ -45,8 +37,7 @@ export const Toolbar = ({ value, entries }) => {
           `}
           value={value}
           onChange={({ target }) => {
-            searchUrl(target.value)
-            setInput(target.value)
+            navigate(target.value)
           }}
         />
         <div className={css`
@@ -56,18 +47,7 @@ export const Toolbar = ({ value, entries }) => {
           margin: 0px 10px;
         `}>
           <HelpPopup>
-            <div className={css`
-              border: 1px solid black;
-              border-radius: 100px;
-              width: 16px;
-              height: 16px;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              font-size: 14px;
-              font-weight: bold;
-              cursor: pointer;
-            `}>?</div>
+            <Icon>?</Icon>
           </HelpPopup>
         </div>
       </div>
@@ -90,29 +70,4 @@ export const HelpPopup = ({ children }) => {
     <p>Search by file by prepending a slash (<Code>/</Code>) then typing a partial file path. For example, <Code>/fleets.txt</Code> returns results all files named <Code>fleets.txt</Code>.</p>
     <p>You can mix and match all three modes of searching. For example, <Code>.event /events "capture Poisonwood"</Code> looks for an event in a file with <Code>/events</Code> in it's path containing the literal text <Code>"capture Poisonwood"</Code>.</p>
   </Popup>
-}
-
-export const Popup = ({ target, children }) => {
-  const [open, setOpen] = useState(false)
-  return <div className={css`position: relative;`}>
-    <div onClick={() => setOpen(prev => !prev)}>{target}</div>
-    {open && (
-      <div className={css`
-        position: absolute;
-        background: white;
-        top: 100%;
-        right: 100%;
-        width: 600px;
-        border-radius: 3px;
-        border: 1px solid grey;
-        padding: 0px 16px;
-      `}>
-        {children}
-        <p><a href="#" onClick={event => {
-          event.preventDefault()
-          setOpen(false)
-        }}>close</a></p>
-      </div>
-    )}
-  </div>
 }

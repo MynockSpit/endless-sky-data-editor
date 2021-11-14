@@ -8,22 +8,41 @@ let roots = {}
 
 let type = os.type()
 if (type === 'Darwin') {
-  roots.data = `${os.homedir()}/Library/Application\ Support/Steam/steamapps/common/Endless\ Sky/data/`
+  // we'll need something in the app to switch where the data comes from.
+  roots.data = `/Applications/Endless\ Sky.app/Contents/MacOS/Endless\ Sky/data/`
+  roots.steam = `${os.homedir()}/Library/Application\ Support/Steam/steamapps/common/Endless\ Sky/data/`
+
+  // handle the ES2Launcher somehow?
+  // "~/Library/Application Support/ESLauncher2/instances/"
+  // "Endless Sky.app/Contents/Resources/data/"
+
+  // plugins
   roots.plugins = `${os.homedir()}/Library/Application\ Support/endless-sky/plugins/`
-  roots.internalPlugins = `${os.homedir()}/Library/Application\ Support/Steam/steamapps/common/Endless\ Sky/EndlessSky.app/Contents/Resources/plugins`
+  roots.internalPlugins = `${os.homedir()}/Library/Application\ Support/Steam/steamapps/common/Endless\ Sky/EndlessSky.app/Contents/Resources/plugins/`
+
 } else if ('Windows_NT') {
   // I don't use windows, so it only loads plugins until I can find someone with that info
   roots.data = `` // ?????
+  roots.steam = `` // ?????
+  // handle the ES2Launcher somehow?
+
+  // plugins
   roots.plugins = `${os.homedir()}\\AppData\\Roaming\\endless-sky\\plugins\\`
   roots.internalPlugins = `` // ?????
 } else {
   // I don't use linux either, so, uh yeah. No idea
   roots.data = `` // ?????
+  roots.steam = `` // ?????
+  // handle the ES2Launcher somehow?
+
+  // plugins
   roots.plugins = `${os.homedir()}/.local/share/endless-sky/plugins/`
-  roots.internalPlugins = `/usr/share/endless-sky/plugins/` // ?????
+  roots.internalPlugins = `/usr/share/endless-sky/plugins/`
 }
 
 let id = 0;
+
+let allTypes = {}
 
 async function collectData(rootKey) {
   let rootPath = roots[rootKey]
@@ -75,6 +94,10 @@ async function collectData(rootKey) {
 
         line.fullKey = getFullKey(line)
         line.rootParent = getRootParent(line).id
+
+        if (parent === undefined) {
+          allTypes[line.key] = true
+        }
 
         allLines[lineId] = line
       }
@@ -164,8 +187,12 @@ function getRootParent(line) {
 }
 
 async function main() {
-  await collectData('data')
-  await collectData('plugins')
+  try { await collectData('data') } catch (e) {}
+  try { await collectData('steam') } catch (e) {}
+  try { await collectData('plugins') } catch (e) {}
+  try { await collectData('internalPlugins') } catch (e) {}
+
+  console.log(Object.keys(allTypes).sort(), Object.keys(allTypes).length)
 
   fs.writeFileSync('./src/data.json', JSON.stringify({ lines: allLines, roots }, null, 2), 'utf-8')
 }

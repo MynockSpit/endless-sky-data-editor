@@ -1,48 +1,85 @@
 import { css } from "@emotion/css"
-import React, { useState } from "react"
+import React from "react"
+import { Link } from "react-router-dom"
+import { Icon } from "../components/Icon"
+import { Popup } from "../components/Popup"
 import { data } from "../data"
+import { getSearchUrl } from "../misc"
+import { setInput, useLineMeta } from "../store"
+import ReactList from 'react-list';
 
 export const Entries = ({ entries }) => {
-  return entries.map(line => {
-    let CustomEntry = CustomEntries[entries.key]
+  return <ReactList
+    itemRenderer={(index, reactKey) => {
+      let line = entries[index]
+      let CustomEntry = CustomEntries[entries.key]
 
-    if (CustomEntry) {
-      return <CustomEntry key={line.id} rootLine={line} />
-    }
+      if (CustomEntry) {
+        return <CustomEntry key={reactKey} rootLine={line} />
+      }
 
-    return <GenericEntry key={line.id} line={line} />
-  })
+      return <GenericEntry key={reactKey} line={line} />
+    }}
+    length={entries.length}
+    type='uniform'
+  />
 }
 
 const GenericEntry = ({ line }) => {
-  const [open, setOpen] = useState((line.parent === undefined) ? false : true)
+  const [open, setOpen] = useLineMeta(`${line.id}.open`)
 
-  let tabs = new Array(line.depth).fill('')
+  let realOpen = open !== undefined ? open : (line.parent === undefined ? false : true)
 
   return <>
     <div className={css`display: flex; justify-content: space-between;`}>
       <div className={css`display: flex;`}>
-        {tabs.map(() => <div className={css`width: 20px; flex-shrink: 0;`} ></div>)}
-        <Foldable show={line.children && line.children.length} open={open} setOpen={setOpen} />
+        <div className={css`width: ${20*line.depth}px; flex-shrink: 0;`} ></div>
+        <Foldable show={line.children && line.children.length} open={realOpen} setOpen={setOpen} />
         {line.data.map((entry, index) => {
-          // if (specialParseRule) {
-          // return specialParseRule(entry, index)
-          // } else {
-          return <div key={entry + index} className={css`border: 0; margin: 2px 4px;`}>{entry}</div>
-          // }
+
+          let searchMaker = getSearchMaker(line)
+          let search = ''
+
+          if (searchMaker) {
+            let entries = new Array(index + 1).fill('')
+            entries[index] = entry
+            search = searchMaker(...entries)
+          }
+
+          return <div key={entry + index} className={css`border: 0; margin: 2px 4px;`}>
+            {search ? (
+              <SearchLink
+                search={search}
+              >
+                {entry}
+              </SearchLink>) : entry}
+          </div>
         })}
       </div>
-      <div
-        className={css`
-          margin: 2px 4px;
-          flex-shrink: 0;
-        `}
-      >
+      <div className={css` margin: 2px 4px; flex-shrink: 0; `}>
         <a href={`vscode://file/${data.roots[line.root]}${line.filePath}:${line.lineNumber}`}>{line.filePath}:{line.lineNumber}</a> ({line.root})
+        <Popup target={<Icon>?</Icon>}>
+          <pre>
+            {JSON.stringify(line, null, 2)}
+          </pre>
+        </Popup>
       </div>
     </div>
-    {(line.children && open) && line.children.map(childId => <GenericEntry key={childId} line={data.lines[childId]} />)}
+    {/* {(line.children && realOpen) && line.children.map(childId => <GenericEntry key={childId} line={data.lines[childId]} />)} */}
   </>
+}
+
+const SearchLink = ({ search, children, onClick, ...props }) => {
+  return <Link
+    {...props}
+    to={getSearchUrl(search)}
+    onClick={(event) => {
+      setInput(search)
+      if (onClick) onClick(event)
+    }}
+  >
+    {children}
+  </Link>
 }
 
 const Foldable = ({ open = false, show = false, setOpen }) => {
@@ -66,29 +103,70 @@ const Foldable = ({ open = false, show = false, setOpen }) => {
   }
 }
 
-const linkFirstChildToSearch = (key, value, index) => {
-  if (index !== 1) {
-    return <div key={value} className={css`border: 0; margin: 2px 4px;`}>
-      {value}
-    </div>
-  }
-  return <div key={value} className={css`border: 0; margin: 2px 4px;`}>
-    <a
-      href={searchUrl(`.${key} ${value}`, false)}
-      onClick={(event) => {
-        event.preventDefault()
-        searchUrl(`.${key} ${value}`)
-      }}
-    >{value}</a>
-  </div>
+function first(array) {
+  return outfitter.find(item => item)
 }
 
-const parseRules = {
-  "government": (value, index) => linkFirstChildToSearch('government', value, index),
-  "conversation": (value, index) => linkFirstChildToSearch('conversation', value, index),
-  "system": (value, index) => linkFirstChildToSearch('system', value, index),
-  "fleet": (value, index) => linkFirstChildToSearch('fleet', value, index),
-  "names": (value, index) => linkFirstChildToSearch('phrase', value, index),
+function getSearchMaker(line) {
+  let matches = {
+
+    // 'color'
+    // not linkable
+
+    // 'conversation'
+    // 'effect'
+    // 'event'
+
+    // 'fleet'
+    // https://github.com/endless-sky/endless-sky/wiki/CreatingFleets
+    "fleet": (fleet, name) => name ? `.fleet ${name}` : '',
+    "fleet.government": (government, name) => name ? `.government ${name}` : '',
+    "fleet.names": (names, phrase) => phrase ? `.phrase ${phrase}` : '',
+    "fleet.fighters": (fighters, phrase) => phrase ? `.phrase ${phrase}` : '',
+    // "fleet.cargo": value => ``, // not linkable
+    // "fleet.commodities": value => ``, // not linkable yet b/c all "trade" is in one block
+    "fleet.outfitters": (outfitters, ...outfitter) => first(outfitter) ? `.outfitter ${first(outfitter)}` : '',
+    // "fleet.personality": value => ``, // not linkable
+    // "fleet.personality.*": value => ``, // not linkable
+    "fleet.variant.*": (ship) => ship ? `.ship ${ship}` : '',
+
+    // 'galaxy'
+    // 'government'
+    // 'help'
+    // 'interface'
+    // 'landing message'
+    // 'minable'
+    // 'mission'
+    // 'news'
+    // 'outfit'
+    // 'outfitter'
+    // 'person'
+    // 'phrase'
+    // 'planet'
+    // 'rating'
+    // 'ship'
+    // 'shipyard'
+    // 'star'
+    // 'start'
+    // 'system'
+    // 'tip'
+    // 'trade'
+  }
+
+  let keys = getAllLevelsOfSpecificity(line.fullKey)
+
+  let match = matches[keys.find(key => matches[key])]
+
+  return match
+}
+
+function getAllLevelsOfSpecificity(key) {
+  let starLast = key.split('.').reverse().slice(1).reverse().concat('*').join('.')
+
+  return [
+    key,
+    starLast
+  ]
 }
 
 const CustomEntries = {}

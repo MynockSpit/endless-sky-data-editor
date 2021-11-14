@@ -1,6 +1,8 @@
 import { parseInput } from './parse-input'
 
+import _ from 'lodash'
 import dataJson from './data.json'
+import { getLineMeta } from './store'
 export const data = dataJson
 
 export function getFilteredLines(filter) {
@@ -30,7 +32,28 @@ export function getFilteredLines(filter) {
   filteredLines.forEach(line => {
     relevantEntries[line.rootParent] = data.lines[line.rootParent]
   })
+
   return Object.values(relevantEntries).sort((entryA, entryB) => {
     return (entryA.data.join(' ').replace(/"/g, '')).localeCompare(entryB.data.join(' ').replace(/"/g, ''))
   })
+}
+
+export function getVisibleLines(filteredLines, visibleLines = []) {
+  filteredLines.forEach(line => {
+
+    let open = getLineMeta(`${line.id}.open`)
+
+    if (open === undefined) {
+      open = (line.parent) ? true : false
+    }
+
+    visibleLines.push(line)
+
+    if (open && line.children) {
+      console.log('hi')
+      getVisibleLines(line.children.map(childId => data.lines[childId]), visibleLines)
+    }
+  })
+
+  return visibleLines
 }

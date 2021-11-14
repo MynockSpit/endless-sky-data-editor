@@ -1,0 +1,4 @@
+- intercept CMD/CTRL + F to focus the search box
+- provide some user-y way of describing the data source you want
+- fill out the link templates for the other 25 resource types
+- link entries to their respective documentation pages
