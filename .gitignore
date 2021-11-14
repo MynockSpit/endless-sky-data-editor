@@ -1,0 +1,5 @@
+/src/data.json
+/node_modules
+/.parcel-cache
+/dist
+/.DS_Store
