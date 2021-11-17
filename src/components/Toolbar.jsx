@@ -54,14 +54,14 @@ export const Toolbar = ({ value, entries }) => {
           </HelpPopup>
         </div>
       </div>
-      <div className={css`margin: 5px;`}>{resourceCount(entries)} matching {parseInput(value).map((entry, index, all) => {
+      <div className={css`margin: 5px;`}>{resourceCount(entries)} resources matching {parseInput(value).map((entry, index, all) => {
         let separator = Boolean(all[index + 1]) ? <b>AND </b> : ''
         if (entry.type === 'resource') {
           let matchesOrContains = entry.operator === '=' ? 'equals' : 'contains'
-          return <React.Fragment key={entry.raw}> resource of type <Code>{entry.key}</Code> {entry.operator && (<>{matchesOrContains} <Code>{entry.value}</Code></>)} {separator}</React.Fragment>
+          return <React.Fragment key={entry.raw}> resource type <Code>{entry.key}</Code> {entry.operator && <>{matchesOrContains} <Code>{entry.value}</Code></>} {separator}</React.Fragment>
         } else if (entry.type === 'property') {
           let matchesOrContains = entry.operator === '=' ? 'matches' : 'contains'
-          return <React.Fragment key={entry.raw}>property <Code>{entry.key}</Code> {matchesOrContains} <Code>{entry.value}</Code> {separator}</React.Fragment>
+          return <React.Fragment key={entry.raw}>property <Code>{entry.key}</Code> {entry.operator && <>{matchesOrContains} <Code>{entry.value}</Code></>} {separator}</React.Fragment>
         } else if (entry.type === 'file-path') {
           return <React.Fragment key={entry.raw}>file path contains <Code>{entry.value}</Code> {separator}</React.Fragment>
         } else if (entry.type === 'search') {
@@ -77,7 +77,7 @@ export const Toolbar = ({ value, entries }) => {
 
 export const HelpPopup = ({ children }) => {
   return <Popup target={children}>
-    <p>Search happens on a resource-by-resource basis. Every term you provide MUST at least one line in the resource. If all terms are matched, the entire root resource is displayed.</p>
+    <p>Search happens on a resource-by-resource basis. Every term you provide MUST match at least one line in the resource. If all terms are matched at least once, the entire root resource is displayed.</p>
 
     <ul>
       <li><p>The <Code>#</Code> prefix can be used to search for resource types.  </p>

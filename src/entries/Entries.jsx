@@ -35,7 +35,7 @@ const GenericEntry = ({ line }) => {
   return <>
     <div className={css`display: flex; justify-content: space-between;`}>
       <div className={css`display: flex;`}>
-        <div className={css`width: ${20*line.depth}px; flex-shrink: 0;`} ></div>
+        <div className={css`width: ${20 * line.depth}px; flex-shrink: 0;`} ></div>
         <Foldable show={line.children && line.children.length} open={realOpen} setOpen={setOpen} />
         {line.data.map((entry, index) => {
 
@@ -60,10 +60,12 @@ const GenericEntry = ({ line }) => {
       </div>
       <div className={css` margin: 2px 4px; flex-shrink: 0; `}>
         <a href={`vscode://file/${data.roots[line.root]}${line.filePath}:${line.lineNumber}`}>{line.filePath}:{line.lineNumber}</a> ({line.root})
-        <Popup target={<Icon>?</Icon>}>
-          <Code>
-            {JSON.stringify(line, null, 2)}
-          </Code>
+        <Popup target={<Icon>?</Icon>} className={css`margin-left: 4px`}>
+          <p>
+            <Code block>
+              {JSON.stringify(line, null, 2)}
+            </Code>
+          </p>
         </Popup>
       </div>
     </div>

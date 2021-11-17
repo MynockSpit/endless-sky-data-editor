@@ -1,9 +1,9 @@
-import { css } from '@emotion/css'
+import { css, cx } from '@emotion/css'
 import React, { useState } from 'react'
 
-export const Popup = ({ target, children }) => {
+export const Popup = ({ target, children, className, ...props }) => {
   const [open, setOpen] = useState(false)
-  return <div className={css`position: relative; display: inline-block;`}>
+  return <div className={cx(css`position: relative; display: inline-block;`, className)} {...props}>
     <div onClick={() => setOpen(prev => !prev)}>{target}</div>
     {open && (
       <div className={css`
@@ -13,6 +13,7 @@ export const Popup = ({ target, children }) => {
         right: 100%;
         width: 600px;
         max-height: 50vh;
+        overflow: auto;
         border-radius: 3px;
         border: 1px solid grey;
         padding: 0px 16px;

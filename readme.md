@@ -12,7 +12,7 @@ Step 3: Run `npm start`
 
 ## Searching
 
-Search happens on a resource-by-resource basis. Every term you provide MUST at least one line in the resource. If all terms are matched, the entire root resource is displayed.
+Search happens on a resource-by-resource basis. Every term you provide MUST match at least one line in the resource. If all terms are matched at least once, the entire root resource is displayed.
 
 - The `#` prefix can be used to search for resource types.  
 
