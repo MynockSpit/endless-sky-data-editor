@@ -2,7 +2,7 @@ import { useNavigate } from "react-router-dom";
 import { setInput } from "./store";
 
 export function getSearchUrl(query) {
-  return `?search=${query}`;
+  return `?search=${encodeURIComponent(query)}`;
 }
 
 let last = 0

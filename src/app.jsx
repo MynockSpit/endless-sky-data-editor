@@ -1,4 +1,4 @@
-import React, { useEffect} from 'react'
+import React, { useEffect, useMemo } from 'react'
 import ReactDOM from 'react-dom'
 
 import { getFilteredLines, getVisibleLines } from './data'
@@ -22,8 +22,10 @@ const LocationInterceptor = () => {
 
 const App = () => {
   let [inputValue] = useInput()
-  useLineMeta()
-  let filteredLines = getFilteredLines(inputValue)
+  
+  useLineMeta() 
+
+  let filteredLines = useMemo(() => getFilteredLines(inputValue), [inputValue])
   let visibleLines = getVisibleLines(filteredLines)
 
   return <BrowserRouter>

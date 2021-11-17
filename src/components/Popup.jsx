@@ -12,6 +12,7 @@ export const Popup = ({ target, children }) => {
         top: 100%;
         right: 100%;
         width: 600px;
+        max-height: 50vh;
         border-radius: 3px;
         border: 1px solid grey;
         padding: 0px 16px;

@@ -2,3 +2,9 @@
 - provide some user-y way of describing the data source you want
 - fill out the link templates for the other 25 resource types
 - link entries to their respective documentation pages
+- allow user to make search case sensitive
+- make quotes work better (e.g. `foo bar'baz bing` currently groups as `["foo", "bar'baz bing"]` instead of `["foo", "bar'baz", "bing"]`)
+- make this work:`.variant.*=Fury`
+- support <, >, >=, and <=
+- handle commodities (currently all of them are nested under one `trade` resource which makes searching dumb)
+- handle scrolling to specific line

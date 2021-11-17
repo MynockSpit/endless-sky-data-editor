@@ -58,7 +58,7 @@ async function collectData(rootKey) {
       let noCommentLine = line.replace(/#.*/, '')
       if (noCommentLine.trim() !== '') {
         let [depth, parsedLine] = tokenize(noCommentLine)
-        let lineId = id++;
+        let lineId = String(id++);
 
         if (depth <= stack.length) {
           while (depth < stack.length) {

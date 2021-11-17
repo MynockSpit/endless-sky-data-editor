@@ -7,6 +7,7 @@ import { data } from "../data"
 import { getSearchUrl } from "../misc"
 import { setInput, useLineMeta } from "../store"
 import ReactList from 'react-list';
+import { Code } from "../components/Code"
 
 export const Entries = ({ entries }) => {
   return <ReactList
@@ -20,8 +21,9 @@ export const Entries = ({ entries }) => {
 
       return <GenericEntry key={reactKey} line={line} />
     }}
+    itemSizeEstimator={() => 22}
     length={entries.length}
-    type='uniform'
+    type='variable'
   />
 }
 
@@ -59,9 +61,9 @@ const GenericEntry = ({ line }) => {
       <div className={css` margin: 2px 4px; flex-shrink: 0; `}>
         <a href={`vscode://file/${data.roots[line.root]}${line.filePath}:${line.lineNumber}`}>{line.filePath}:{line.lineNumber}</a> ({line.root})
         <Popup target={<Icon>?</Icon>}>
-          <pre>
+          <Code>
             {JSON.stringify(line, null, 2)}
-          </pre>
+          </Code>
         </Popup>
       </div>
     </div>
@@ -104,7 +106,7 @@ const Foldable = ({ open = false, show = false, setOpen }) => {
 }
 
 function first(array) {
-  return outfitter.find(item => item)
+  return array.find(item => item)
 }
 
 function getSearchMaker(line) {
@@ -114,21 +116,24 @@ function getSearchMaker(line) {
     // not linkable
 
     // 'conversation'
+    "conversation": (conversation, name) => name ? `#conversation=${name}` : '',
+    // conversation seems hard to link without being able to scroll to a specific line/collapse non-relevant lines
+
     // 'effect'
     // 'event'
 
     // 'fleet'
     // https://github.com/endless-sky/endless-sky/wiki/CreatingFleets
-    "fleet": (fleet, name) => name ? `.fleet ${name}` : '',
-    "fleet.government": (government, name) => name ? `.government ${name}` : '',
-    "fleet.names": (names, phrase) => phrase ? `.phrase ${phrase}` : '',
-    "fleet.fighters": (fighters, phrase) => phrase ? `.phrase ${phrase}` : '',
+    "fleet": (fleet, name) => name ? `#fleet=${name}` : '',
+    "fleet.government": (government, name) => name ? `#government=${name}` : '',
+    "fleet.names": (names, phrase) => phrase ? `#phrase=${phrase}` : '',
+    "fleet.fighters": (fighters, phrase) => phrase ? `#phrase=${phrase}` : '',
     // "fleet.cargo": value => ``, // not linkable
     // "fleet.commodities": value => ``, // not linkable yet b/c all "trade" is in one block
-    "fleet.outfitters": (outfitters, ...outfitter) => first(outfitter) ? `.outfitter ${first(outfitter)}` : '',
+    "fleet.outfitters": (outfitters, ...outfitter) => first(outfitter) ? `#outfitter=${first(outfitter)}` : '',
     // "fleet.personality": value => ``, // not linkable
     // "fleet.personality.*": value => ``, // not linkable
-    "fleet.variant.*": (ship) => ship ? `.ship ${ship}` : '',
+    "fleet.variant.*": (ship) => ship ? `#ship=${ship}` : '',
 
     // 'galaxy'
     // 'government'
@@ -144,7 +149,15 @@ function getSearchMaker(line) {
     // 'phrase'
     // 'planet'
     // 'rating'
+
     // 'ship'
+    "ship": (ship, name, alternate) => (name || alternate) ? `#ship=${name || alternate}` : '',
+    "ship.attributes.category": (category, type) => type ? `#ship .category=${type}` : '',
+    "ship.outfits.*": (outfit) => outfit ? `#outfit=${outfit}` : '',
+    "ship.explode": (explode, effect) => effect ? `#effect=${effect}` : '',
+    "ship.final explode": (explode, effect) => effect ? `#effect=${effect}` : '',
+    "ship.leak": (leak, effect) => effect ? `#effect=${effect}` : '',
+
     // 'shipyard'
     // 'star'
     // 'start'
