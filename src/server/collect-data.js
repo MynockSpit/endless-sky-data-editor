@@ -1,49 +1,48 @@
-const fs = require('fs')
-const os = require('os')
+import fs from 'fs'
+import os from 'os'
 
-var recursive = require("recursive-readdir");
+import recursive from "recursive-readdir";
 
 let allLines = {}
+let allTypes = {}
 let roots = {}
 
-let type = os.type()
-if (type === 'Darwin') {
-  // we'll need something in the app to switch where the data comes from.
-  roots.data = `/Applications/Endless\ Sky.app/Contents/MacOS/Endless\ Sky/data/`
-  roots.steam = `${os.homedir()}/Library/Application\ Support/Steam/steamapps/common/Endless\ Sky/data/`
+function getRoots() {
+  if (process.platform === 'darwin') {
+    // we'll need something in the app to switch where the data comes from.
+    roots.data = `/Applications/Endless Sky.app/Contents/MacOS/Endless Sky/data/`
+    roots.steam = `${os.homedir()}/Library/Application Support/Steam/steamapps/common/Endless Sky/data/`
 
-  // handle the ES2Launcher somehow?
-  // "~/Library/Application Support/ESLauncher2/instances/"
-  // "Endless Sky.app/Contents/Resources/data/"
+    // handle the ES2Launcher somehow?
+    // "~/Library/Application Support/ESLauncher2/instances/"
+    // "Endless Sky.app/Contents/Resources/data/"
 
-  // plugins
-  roots.plugins = `${os.homedir()}/Library/Application\ Support/endless-sky/plugins/`
-  roots.internalPlugins = `${os.homedir()}/Library/Application\ Support/Steam/steamapps/common/Endless\ Sky/EndlessSky.app/Contents/Resources/plugins/`
+    // plugins
+    roots.plugins = `${os.homedir()}/Library/Application Support/endless-sky/plugins/`
+    roots.internalPlugins = `${os.homedir()}/Library/Application Support/Steam/steamapps/common/Endless Sky/EndlessSky.app/Contents/Resources/plugins/`
 
-} else if ('Windows_NT') {
-  // I don't use windows, so it only loads plugins until I can find someone with that info
-  roots.data = `` // ?????
-  roots.steam = `` // ?????
-  // handle the ES2Launcher somehow?
+  } else if (process.platform === 'win32') {
+    // I don't use windows, so it only loads plugins until I can find someone with that info
+    roots.data = `` // ?????
+    roots.steam = `` // ?????
+    // handle the ES2Launcher somehow?
 
-  // plugins
-  roots.plugins = `${os.homedir()}\\AppData\\Roaming\\endless-sky\\plugins\\`
-  roots.internalPlugins = `` // ?????
-} else {
-  // I don't use linux either, so, uh yeah. No idea
-  roots.data = `` // ?????
-  roots.steam = `` // ?????
-  // handle the ES2Launcher somehow?
+    // plugins
+    roots.plugins = `${os.homedir()}\\AppData\\Roaming\\endless-sky\\plugins\\`
+    roots.internalPlugins = `` // ?????
+  } else {
+    // I don't use linux either, so, uh yeah. No idea
+    roots.data = `` // ?????
+    roots.steam = `` // ?????
+    // handle the ES2Launcher somehow?
 
-  // plugins
-  roots.plugins = `${os.homedir()}/.local/share/endless-sky/plugins/`
-  roots.internalPlugins = `/usr/share/endless-sky/plugins/`
+    // plugins
+    roots.plugins = `${os.homedir()}/.local/share/endless-sky/plugins/`
+    roots.internalPlugins = `/usr/share/endless-sky/plugins/`
+  }
 }
 
 let id = 0;
-
-let allTypes = {}
-
 async function collectData(rootKey) {
   let rootPath = roots[rootKey]
   const files = await recursive(rootPath, [".DS_Store", "copyright.txt"])
@@ -140,6 +139,7 @@ function tokenize(string) {
     else if (char === '"') {
       currentToken += char
       if (insideBackticks) {
+        // do nothing
       } else if (!insideQuotes) {
         insideQuotes = true
       } else {
@@ -150,6 +150,7 @@ function tokenize(string) {
     else if (char === '`') {
       currentToken += char
       if (insideQuotes) {
+        // do nothing
       } else if (!insideBackticks) {
         insideBackticks = true
       } else {
@@ -186,15 +187,21 @@ function getRootParent(line) {
   return line
 }
 
-async function main() {
-  try { await collectData('data') } catch (e) {}
-  try { await collectData('steam') } catch (e) {}
-  try { await collectData('plugins') } catch (e) {}
-  try { await collectData('internalPlugins') } catch (e) {}
+export default async function loadData() {
+  id = 0
+  allLines = {}
+  allTypes = {}
+  roots = {}
+
+  getRoots()
+
+  try { await collectData('data') } catch (e) { /* ignore */ }
+  try { await collectData('steam') } catch (e) { /* ignore */ }
+  try { await collectData('plugins') } catch (e) { /* ignore */ }
+  try { await collectData('internalPlugins') } catch (e) { /* ignore */ }
 
   console.log(Object.keys(allTypes).sort(), Object.keys(allTypes).length)
 
-  fs.writeFileSync('./src/data.json', JSON.stringify({ lines: allLines, roots }, null, 2), 'utf-8')
+  // fs.writeFileSync('./src/data.json', JSON.stringify({ lines: allLines, roots }, null, 2), 'utf-8')
+  return JSON.stringify({ lines: allLines, roots })
 }
-
-main()

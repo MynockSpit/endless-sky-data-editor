@@ -62,7 +62,7 @@ export function makeStateHook<Data extends GenericObject>(
   function updateSubscribers() {
     Object.values(subscribers).forEach((subscriber) => {
       if (subscriber.path) {
-        let currentData = _.get(data, subscriber.path);
+        const currentData = _.get(data, subscriber.path);
         if (subscriber.previousData !== currentData) {
           subscriber.previousData = currentData;
           subscriber.update(_.cloneDeep(currentData), subscriber.unsubscribe);
@@ -80,7 +80,7 @@ export function makeStateHook<Data extends GenericObject>(
     // originally, this was a fn that flopped between `true` and `false`, but that has issues when it's run twice in quick succession
     // instead, increment, but cycle after 100
     // that way, set would need to be fired 100 times to "update" to the same value
-    const [, forceUpdate] = useReducer((c) => (c > 100 ? 0 : c+1), 0);
+    const [, forceUpdate] = useReducer((c: number) => (c > 100 ? 0 : c+1), 0);
 
     // register this component's forceUpdate as a subscriber
     // subscribers get triggered by "updateAllHooks"
@@ -93,7 +93,7 @@ export function makeStateHook<Data extends GenericObject>(
     if (path) {
       return [
         _.get(data, path),
-        (dataOrFn) => setData(path, dataOrFn as SetDataUpdaterFn<Data> | Data),
+        (dataOrFn: any) => setData(path, dataOrFn as SetDataUpdaterFn<Data> | Data),
       ];
     } else {
       return [data, setData];
@@ -107,11 +107,11 @@ export function makeStateHook<Data extends GenericObject>(
   ) {
     if (arguments.length === 2) {
       // two arguments means that the first argument is a lodash-style Path and the second is either new data or an updater function
-      let path = pathOrDataOrDataFn as _.PropertyPath;
+      const path = pathOrDataOrDataFn as _.PropertyPath;
 
-      let nextData = _.cloneDeep(data); // prepare for new data
+      const nextData = _.cloneDeep(data); // prepare for new data
 
-      let newData =
+      const newData =
         typeof dataOrFn === 'function'
           ? (dataOrFn as SetDataUpdaterFn<any>)(_.get(nextData, path)) // either run the updater to get new data
           : dataOrFn; // or, if it's not an updater, use it as new data

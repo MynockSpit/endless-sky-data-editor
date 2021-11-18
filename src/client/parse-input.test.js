@@ -1,4 +1,4 @@
-const { parseInput, tokenizeInput } = require("./parse-input")
+const { parseInput, tokenizeInput } = require("./filter")
 
 describe('parseInput path', () => {
   test('basic path works', () => {

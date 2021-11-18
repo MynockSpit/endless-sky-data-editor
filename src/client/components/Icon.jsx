@@ -1,5 +1,5 @@
 import React from 'react'
-const { css, cx } = require("@emotion/css")
+import { css, cx } from "@emotion/css"
 
 export const Icon = ({ children, className, ...props }) => {
   return (

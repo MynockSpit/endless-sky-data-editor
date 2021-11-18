@@ -5,7 +5,7 @@ import { Icon } from './Icon';
 import { Code } from './Code';
 import { useSearchNavigate } from '../misc';
 import _ from 'lodash'
-import { parseInput } from '../parse-input';
+import { parseInput } from '../filter';
 
 function resourceCount(inputLines) {
   let count = 0
@@ -15,7 +15,7 @@ function resourceCount(inputLines) {
   return count
 }
 
-export const Toolbar = ({ value, entries }) => {
+export const Toolbar = ({ value, entries, loading }) => {
   const navigate = useSearchNavigate()
 
   return (
@@ -54,23 +54,27 @@ export const Toolbar = ({ value, entries }) => {
           </HelpPopup>
         </div>
       </div>
-      <div className={css`margin: 5px;`}>{resourceCount(entries)} resources matching {parseInput(value).map((entry, index, all) => {
-        let separator = Boolean(all[index + 1]) ? <b>AND </b> : ''
-        if (entry.type === 'resource') {
-          let matchesOrContains = entry.operator === '=' ? 'equals' : 'contains'
-          return <React.Fragment key={entry.raw}> resource type <Code>{entry.key}</Code> {entry.operator && <>{matchesOrContains} <Code>{entry.value}</Code></>} {separator}</React.Fragment>
-        } else if (entry.type === 'property') {
-          let matchesOrContains = entry.operator === '=' ? 'matches' : 'contains'
-          return <React.Fragment key={entry.raw}>property <Code>{entry.key}</Code> {entry.operator && <>{matchesOrContains} <Code>{entry.value}</Code></>} {separator}</React.Fragment>
-        } else if (entry.type === 'file-path') {
-          return <React.Fragment key={entry.raw}>file path contains <Code>{entry.value}</Code> {separator}</React.Fragment>
-        } else if (entry.type === 'search') {
-          return <React.Fragment key={entry.raw}>any line contains <Code>{entry.value}</Code> {separator}</React.Fragment>
-        } else {
-          return <React.Fragment key={entry.raw}>{JSON.stringify(entry, null, 2)} {separator}</React.Fragment>
-        }
-      })}
-      </div>
+      {loading ? (
+        <div className={css`margin: 5px;`}>Loading resources...</div>
+      ) : (
+        <div className={css`margin: 5px;`}>{resourceCount(entries)} resources matching {parseInput(value).map((entry, index, all) => {
+          let separator = all[index + 1] ? <b>AND </b> : ''
+          if (entry.type === 'resource') {
+            let matchesOrContains = entry.operator === '=' ? 'equals' : 'contains'
+            return <React.Fragment key={entry.raw}> resource type <Code>{entry.key}</Code> {entry.operator && <>{matchesOrContains} <Code>{entry.value}</Code></>} {separator}</React.Fragment>
+          } else if (entry.type === 'property') {
+            let matchesOrContains = entry.operator === '=' ? 'matches' : 'contains'
+            return <React.Fragment key={entry.raw}>property <Code>{entry.key}</Code> {entry.operator && <>{matchesOrContains} <Code>{entry.value}</Code></>} {separator}</React.Fragment>
+          } else if (entry.type === 'file-path') {
+            return <React.Fragment key={entry.raw}>file path contains <Code>{entry.value}</Code> {separator}</React.Fragment>
+          } else if (entry.type === 'search') {
+            return <React.Fragment key={entry.raw}>any line contains <Code>{entry.value}</Code> {separator}</React.Fragment>
+          } else {
+            return <React.Fragment key={entry.raw}>{JSON.stringify(entry, null, 2)} {separator}</React.Fragment>
+          }
+        })}
+        </div>
+      )}
     </div>
   )
 }

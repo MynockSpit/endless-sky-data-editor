@@ -1,13 +1,13 @@
 import { css } from "@emotion/css"
 import React from "react"
 import { Link } from "react-router-dom"
-import { Icon } from "../components/Icon"
-import { Popup } from "../components/Popup"
-import { data } from "../data"
-import { getSearchUrl } from "../misc"
-import { setInput, useLineMeta } from "../store"
+import { Icon } from "../Icon"
+import { Popup } from "../Popup"
+import { useData } from "../../data"
+import { getSearchUrl } from "../../misc"
+import { setInput, useLineMeta } from "../../store"
 import ReactList from 'react-list';
-import { Code } from "../components/Code"
+import { Code } from "../Code"
 
 export const Entries = ({ entries }) => {
   return <ReactList
@@ -29,6 +29,7 @@ export const Entries = ({ entries }) => {
 
 const GenericEntry = ({ line }) => {
   const [open, setOpen] = useLineMeta(`${line.id}.open`)
+  const [data] = useData()
 
   let realOpen = open !== undefined ? open : (line.parent === undefined ? false : true)
 
@@ -60,7 +61,7 @@ const GenericEntry = ({ line }) => {
       </div>
       <div className={css` margin: 2px 4px; flex-shrink: 0; `}>
         <a href={`vscode://file/${data.roots[line.root]}${line.filePath}:${line.lineNumber}`}>{line.filePath}:{line.lineNumber}</a> ({line.root})
-        <Popup target={<Icon>?</Icon>} className={css`margin-left: 4px`}>
+        <Popup target={<Icon>?</Icon>} className={css`margin-left: 4px;`}>
           <p>
             <Code block>
               {JSON.stringify(line, null, 2)}

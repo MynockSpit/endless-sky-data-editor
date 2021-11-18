@@ -15,6 +15,8 @@ export function useSearchNavigate() {
     let next = performance.now()
     let replace = (next - last < 500)
     last = next
+
+    console.log({url, query})
     navigate(url, { replace })
     setInput(query)
   }
