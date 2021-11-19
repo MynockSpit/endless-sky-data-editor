@@ -3,9 +3,9 @@ import React from 'react'
 import { Popup } from './Popup';
 import { Icon } from './Icon';
 import { Code } from './Code';
-import { useSearchNavigate } from '../misc';
+import { useSearchNavigate } from '../utilities/misc';
 import _ from 'lodash'
-import { parseInput } from '../filter';
+import { parseInput } from '../utilities/filter';
 
 function resourceCount(inputLines) {
   let count = 0

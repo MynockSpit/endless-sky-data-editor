@@ -1,7 +1,7 @@
 // this means match anything and lower
 // .path.to.resource() key=value anything /file/path
 
-import { getData } from "./data"
+import { getData } from './store';
 
 // this=equal
 // any trailing thing = any value
@@ -15,7 +15,7 @@ import { getData } from "./data"
 
 export function tokenizeInput(string) {
   let tokens = []
-  let currentToken = ""
+  let currentToken = ''
   let groupingChar = ''
   let isGroupingToken = /["`]/
 

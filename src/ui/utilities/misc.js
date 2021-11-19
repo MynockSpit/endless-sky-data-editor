@@ -1,5 +1,5 @@
-import { useNavigate } from "react-router-dom";
-import { setInput } from "./store";
+import { useNavigate } from 'react-router-dom';
+import { setInput } from './store';
 
 export function getSearchUrl(query) {
   return `?search=${encodeURIComponent(query)}`;

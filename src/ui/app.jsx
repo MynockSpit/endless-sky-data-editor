@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo } from 'react'
 import ReactDOM from 'react-dom'
 
-import { getFilteredLines } from './filter'
-import { getVisibleLines, useData } from './data'
+import { getFilteredLines } from './utilities/filter'
+import { getVisibleLines } from './utilities/data'
 import { Entries } from './components/entries/Entries'
-import { getInput, setInput, useInput, useLineMeta } from './store';
+import { getInput, setInput, useData, useInput, useLineMeta } from './utilities/store';
 import { Toolbar } from './components/Toolbar'
 import { BrowserRouter, MemoryRouter, useSearchParams } from 'react-router-dom';
 

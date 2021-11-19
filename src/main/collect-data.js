@@ -1,7 +1,7 @@
 import fs from 'fs'
 import os from 'os'
 
-import recursive from "recursive-readdir";
+import recursive from 'recursive-readdir';
 
 let allLines = {}
 let allTypes = {}
@@ -10,7 +10,7 @@ let roots = {}
 function getRoots() {
   if (process.platform === 'darwin') {
     // we'll need something in the app to switch where the data comes from.
-    roots.data = `/Applications/Endless Sky.app/Contents/MacOS/Endless Sky/data/`
+    roots.data = '/Applications/Endless Sky.app/Contents/MacOS/Endless Sky/data/'
     roots.steam = `${os.homedir()}/Library/Application Support/Steam/steamapps/common/Endless Sky/data/`
 
     // handle the ES2Launcher somehow?
@@ -23,29 +23,29 @@ function getRoots() {
 
   } else if (process.platform === 'win32') {
     // I don't use windows, so it only loads plugins until I can find someone with that info
-    roots.data = `` // ?????
-    roots.steam = `` // ?????
+    roots.data = '' // ?????
+    roots.steam = '' // ?????
     // handle the ES2Launcher somehow?
 
     // plugins
     roots.plugins = `${os.homedir()}\\AppData\\Roaming\\endless-sky\\plugins\\`
-    roots.internalPlugins = `` // ?????
+    roots.internalPlugins = '' // ?????
   } else {
     // I don't use linux either, so, uh yeah. No idea
-    roots.data = `` // ?????
-    roots.steam = `` // ?????
+    roots.data = '' // ?????
+    roots.steam = '' // ?????
     // handle the ES2Launcher somehow?
 
     // plugins
     roots.plugins = `${os.homedir()}/.local/share/endless-sky/plugins/`
-    roots.internalPlugins = `/usr/share/endless-sky/plugins/`
+    roots.internalPlugins = '/usr/share/endless-sky/plugins/'
   }
 }
 
 let id = 0;
 async function collectData(rootKey) {
   let rootPath = roots[rootKey]
-  const files = await recursive(rootPath, [".DS_Store", "copyright.txt"])
+  const files = await recursive(rootPath, ['.DS_Store', 'copyright.txt'])
 
   // `files` is an array of file paths
   files.forEach(filePath => {

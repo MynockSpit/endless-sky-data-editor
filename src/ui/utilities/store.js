@@ -20,3 +20,5 @@ export const [useInput, setInput, getInput] = makeStateHook(getQuery('search'))
 export const [useLineMeta, setLineMeta, getLineMeta] = makeStateHook({
   // [id]: { show: true }
 })
+
+export const [useData, setData, getData] = makeStateHook({ loading: true, roots: {}, lines: [] })

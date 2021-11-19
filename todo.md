@@ -1,7 +1,7 @@
 high
 - [ ] move to electron so people don't have to do crazy shit to launch this
   - [x] set up electron dev environment
-  - [ ] make a production build, make sure it works
+  - [x] make a production build, make sure it works
   - [ ] get github to auto-build the app
 - [ ] provide some user-y way of describing the data source you want
 - [ ] fill out the link templates for the other 25 resource types

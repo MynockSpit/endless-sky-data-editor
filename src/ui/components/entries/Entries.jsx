@@ -3,9 +3,8 @@ import React from "react"
 import { Link } from "react-router-dom"
 import { Icon } from "../Icon"
 import { Popup } from "../Popup"
-import { useData } from "../../data"
-import { getSearchUrl } from "../../misc"
-import { setInput, useLineMeta } from "../../store"
+import { getSearchUrl } from "../../utilities/misc"
+import { setInput, useData, useLineMeta } from "../../utilities/store"
 import ReactList from 'react-list';
 import { Code } from "../Code"
 

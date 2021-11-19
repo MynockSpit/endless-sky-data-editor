@@ -1,13 +1,5 @@
 import _ from 'lodash'
-// import dataJson from './data.json'
-import { getLineMeta } from './store'
-import { makeStateHook } from './stateHook'
-
-// store the previous set of lines returned from the filter and the previous filter used
-// if the previousFilter is a subset (i.e. previous: 'hell'; current: 'hello' ), we can use the previous lines as a starting point
-// let previousFilter = ''
-
-export const [useData, setData, getData] = makeStateHook({ loading: true, roots: {}, lines: [] })
+import { getData, getLineMeta, setData } from './store'
 
 window.electron.onDataChange((event, data) => {
   setData(JSON.parse(data))

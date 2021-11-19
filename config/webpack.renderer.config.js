@@ -12,11 +12,11 @@ module.exports = {
     ],
   },
   target: ['web', 'electron-renderer'],
-  devtool: "hidden-cheap-module-source-map",
+  devtool: 'hidden-cheap-module-source-map',
   plugins: [
     new ForkTsCheckerWebpackPlugin()
   ],
   resolve: {
-    extensions: ['.js', '.ts', '.jsx', '.tsx', '.css']
+    extensions: ['.js', '.ts', '.jsx', '.tsx']
   },
 };

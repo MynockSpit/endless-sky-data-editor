@@ -6,10 +6,11 @@
   "main": ".webpack/main",
   "scripts": {
     "start": "electron-forge start",
+    "test": "jest -c ./config/jest.config.js",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx ."
+    "lint": "eslint --ext .ts,.tsx,.js,.jsx ."
   },
   "keywords": [],
   "author": {
