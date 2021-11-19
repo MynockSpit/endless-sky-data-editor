@@ -18,11 +18,9 @@ const createWindow = (): void => {
     height: 600,
     width: 800,
     webPreferences: {
-      preload: UI_PRELOAD_WEBPACK_ENTRY,
-      nodeIntegration: true,
-      // this is not recommended and bad, but I also can't figure out how to get it to work without it
-      // that said, it should be fine so long as we don't load remote content
-      contextIsolation: false
+      preload: UI_PRELOAD_WEBPACK_ENTRY
+      // if you want node integration, check this bug first
+      // https://github.com/electron-userland/electron-forge/issues/2618
     }
   });
 

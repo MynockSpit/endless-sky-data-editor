@@ -5,7 +5,6 @@ module.exports = {
    */
   entry: './src/main/index.ts',
   // Put your normal webpack config below here
-  devtool: 'hidden-cheap-module-source-map',
   module: {
     rules: require('./webpack.rules'),
   },
