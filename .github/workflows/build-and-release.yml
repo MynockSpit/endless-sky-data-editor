@@ -22,7 +22,25 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Build
+    - name: Install and test
       run: |
         npm install
-        npm run make
+
+    # - name: Build Mac
+    #   run: |
+    #     npx electron-forge make --targets @electron-forge/maker-zip --platform darwin --arch x64
+    #     npx electron-forge make --targets @electron-forge/maker-zip --platform darwin --arch arm64
+
+    - name: Build Linux
+      run: |
+        npx electron-forge make --targets @electron-forge/maker-zip --platform linux --arch x64
+
+    # - name: Build Window
+    #   run: |
+    #     npx electron-forge make --targets @electron-forge/maker-zip --platform win32 --arch x64
+    #     npx electron-forge make --targets @electron-forge/maker-zip --platform win32 --arch x86
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: endless-sky-data-editor-linux-x64
+        path: out/make/zip/linux/arm64/endless-sky-data-editor-linux-arm64-1.0.0.zip
