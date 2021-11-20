@@ -35,6 +35,30 @@ jobs:
       run: |
         npx electron-forge make --targets @electron-forge/maker-zip --platform linux --arch x64
 
+    - uses: actions/upload-artifact@v2
+      with:
+        name: endless-sky-data-editor-linux-x64
+        path: out/make/**
+  
+  build-windows:
+    runs-on: windows-2022
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Install and test
+      run: |
+        npm install
+
     - name: Build Windows
       run: |
         npx electron-forge make --targets @electron-forge/maker-zip --platform win32 --arch x64
