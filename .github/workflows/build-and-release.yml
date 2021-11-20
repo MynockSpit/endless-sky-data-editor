@@ -62,7 +62,6 @@ jobs:
     - name: Build Windows
       run: |
         npx electron-forge make --targets @electron-forge/maker-zip --platform win32 --arch x64
-        npx electron-forge make --targets @electron-forge/maker-zip --platform win32 --arch x86
 
     - uses: actions/upload-artifact@v2
       with:
