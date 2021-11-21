@@ -3,6 +3,7 @@ name: Build and release
 on:
   push:
     tags: [ '*' ]
+    branches: [ main, next ]
   pull_request:
     branches: [ next ]
 
