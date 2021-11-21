@@ -8,7 +8,30 @@ on:
     branches: [ next ]
 
 jobs:
-  build:
+  build-mac:
+    runs-on: macos-11
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+
+    - name: Publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        npm install
+        npm run publish
+
+
+  build-linux:
     runs-on: ubuntu-latest
 
     strategy:
@@ -23,60 +46,31 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
 
-    - name: Install and test
+    - name: Publish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         npm install
+        npm run publish
+
+  build-windows:
+    runs-on: windows-2022
+
+    strategy:
+      matrix:
+        node-version: [16.x]
+    
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
 
     - name: Publish
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: npm run publish
-
-    # - name: Build Mac
-    #   run: |
-    #     npx electron-forge make --targets @electron-forge/maker-zip --platform darwin --arch arm64
-
-    # - name: Build Linux
-    #   run: |
-    #     npx electron-forge make --targets @electron-forge/maker-zip --platform linux --arch x64
-
-    # - name: Upload Mac build
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: mac
-    #     path: out/make/**/darwin/**/*.zip
-
-    # - name: Upload Linux build
-    #   uses: actions/upload-artifact@v2
-    #   with:
-    #     name: linux
-    #     path: out/make/**/linux/**/*.zip
-  
-  # build-windows:
-  #   runs-on: windows-2022
-
-  #   strategy:
-  #     matrix:
-  #       node-version: [16.x]
-    
-  #   steps:
-  #   - uses: actions/checkout@v2
-
-  #   - name: Use Node.js ${{ matrix.node-version }}
-  #     uses: actions/setup-node@v1
-  #     with:
-  #       node-version: ${{ matrix.node-version }}
-
-  #   - name: Install and test
-  #     run: |
-  #       npm install
-
-  #   - name: Build Windows
-  #     run: |
-  #       npx electron-forge make --targets @electron-forge/maker-zip --platform win32 --arch x64
-
-  #   - name: Upload Windows build
-  #     uses: actions/upload-artifact@v2
-  #     with:
-  #       name: windows
-  #       path: out/make/**/win32/**/*.zip
+      run: |
+        npm install
+        npm run publish
