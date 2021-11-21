@@ -22,6 +22,16 @@ module.exports = {
       config: {}
     }
   ],
+  publishers: [
+    {
+      name: '@electron-forge/publisher-github',
+      repository: {
+        owner: 'MynockSpit',
+        name: 'endless-sky-data-editor'
+      },
+      draft: true
+    }
+  ],
   plugins: [
     [
       '@electron-forge/plugin-webpack',
