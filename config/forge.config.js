@@ -31,8 +31,7 @@ module.exports = {
         repository: {
           owner: 'MynockSpit',
           name: 'endless-sky-data-editor'
-        },
-        draft: true
+        }
       }
     }
   ],
