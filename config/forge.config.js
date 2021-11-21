@@ -25,11 +25,25 @@ module.exports = {
   publishers: [
     {
       name: '@electron-forge/publisher-github',
-      repository: {
-        owner: 'MynockSpit',
-        name: 'endless-sky-data-editor'
-      },
-      draft: true
+      platforms: ['darwin', 'linux'],
+      config: {
+        repository: {
+          owner: 'MynockSpit',
+          name: 'endless-sky-data-editor'
+        },
+        draft: true
+      }
+    },
+    {
+      name: '@electron-forge/publisher-github',
+      platforms: ['win32'],
+      config: {
+        repository: {
+          owner: 'MynockSpit',
+          name: 'endless-sky-data-editor'
+        },
+        draft: true
+      }
     }
   ],
   plugins: [
