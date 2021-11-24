@@ -1,11 +1,11 @@
 import React from 'react'
-import { css, cx } from "@emotion/css"
+import { css, cx } from '@emotion/css'
 
-export const Icon = ({ children, className, ...props }) => {
+export const Icon = ({ children, border = false, className, ...props }) => {
   return (
     <div 
       className={cx(css`
-        border: 1px solid black;
+        border: ${border ? '1px solid black' : ''};
         border-radius: 100px;
         width: 16px;
         height: 16px;

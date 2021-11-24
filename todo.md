@@ -3,7 +3,7 @@ high
   - [x] set up electron dev environment
   - [x] make a production build, make sure it works
   - [x] get github to auto-build the app
-- [ ] provide some user-y way of describing the data source you want
+- [x] provide some user-y way of describing the data source you want
 - [ ] fill out the link templates for the other 25 resource types
 - [ ] intercept CMD/CTRL + F to focus the search box
 - [ ] make this work:`.variant.*=Fury`

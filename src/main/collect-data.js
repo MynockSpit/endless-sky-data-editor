@@ -2,106 +2,79 @@ import fs from 'fs'
 import os from 'os'
 
 import recursive from 'recursive-readdir';
-
-let allLines = {}
-let allTypes = {}
-let roots = {}
-
-function getRoots() {
-  if (process.platform === 'darwin') {
-    // we'll need something in the app to switch where the data comes from.
-    roots.data = '/Applications/Endless Sky.app/Contents/MacOS/Endless Sky/data/'
-    roots.steam = `${os.homedir()}/Library/Application Support/Steam/steamapps/common/Endless Sky/data/`
-
-    // handle the ES2Launcher somehow?
-    // "~/Library/Application Support/ESLauncher2/instances/"
-    // "Endless Sky.app/Contents/Resources/data/"
-
-    // plugins
-    roots.plugins = `${os.homedir()}/Library/Application Support/endless-sky/plugins/`
-    roots.internalPlugins = `${os.homedir()}/Library/Application Support/Steam/steamapps/common/Endless Sky/EndlessSky.app/Contents/Resources/plugins/`
-
-  } else if (process.platform === 'win32') {
-    // I don't use windows, so it only loads plugins until I can find someone with that info
-    roots.data = '' // ?????
-    roots.steam = '' // ?????
-    // handle the ES2Launcher somehow?
-
-    // plugins
-    roots.plugins = `${os.homedir()}\\AppData\\Roaming\\endless-sky\\plugins\\`
-    roots.internalPlugins = '' // ?????
-  } else {
-    // I don't use linux either, so, uh yeah. No idea
-    roots.data = '' // ?????
-    roots.steam = '' // ?????
-    // handle the ES2Launcher somehow?
-
-    // plugins
-    roots.plugins = `${os.homedir()}/.local/share/endless-sky/plugins/`
-    roots.internalPlugins = '/usr/share/endless-sky/plugins/'
-  }
-}
+import { getUpdateConfig } from './read-write-user-config.js';
 
 let id = 0;
-async function collectData(rootKey) {
-  let rootPath = roots[rootKey]
-  const files = await recursive(rootPath, ['.DS_Store', 'copyright.txt'])
+async function collectData(rootMeta) {
+  let theseLines = {}
+  let theseTypes = {}
+  let files
+  try {
+    files = await recursive(rootMeta.path, ['.DS_Store', 'copyright.txt'])
+  } catch (error) {
+    return { error }
+  }
 
-  // `files` is an array of file paths
-  files.forEach(filePath => {
-    const file = fs.readFileSync(filePath, 'utf-8').split('\n')
+  if (files) {
+    files.forEach(filePath => {
+      const file = fs.readFileSync(filePath, 'utf-8').split('\n')
 
-    let stack = []
+      let stack = []
 
-    file.forEach((line, lineNumber) => {
-      let noCommentLine = line.replace(/#.*/, '')
-      if (noCommentLine.trim() !== '') {
-        let [depth, parsedLine] = tokenize(noCommentLine)
-        let lineId = String(id++);
+      file.forEach((line, lineNumber) => {
+        let noCommentLine = line.replace(/#.*/, '')
+        if (noCommentLine.trim() !== '') {
+          let [depth, parsedLine] = tokenize(noCommentLine)
+          let lineId = String(id++);
 
-        if (depth <= stack.length) {
-          while (depth < stack.length) {
-            stack.pop()
+          if (depth <= stack.length) {
+            while (depth < stack.length) {
+              stack.pop()
+            }
+            stack.push(lineId)
+          } else if (depth === stack.length + 1) {
+            stack.push(lineId)
+          } else {
+            console.log('something very wrong happened with the nesting', parsedLine, line, lineId)
           }
-          stack.push(lineId)
-        } else if (depth === stack.length + 1) {
-          stack.push(lineId)
-        } else {
-          console.log('something very wrong happened with the nesting', parsedLine, line, lineId)
+
+          let parent = stack[stack.length - 2]
+
+          let line = {
+            data: parsedLine,
+            id: lineId,
+            filePath: filePath.replace(rootMeta.path, ''),
+            root: rootMeta.id,
+            type: rootMeta.type,
+            lineNumber: lineNumber + 1,
+            depth,
+            parent: parent,
+            rootParent: undefined,
+            key: parsedLine[0].replace(/"/g, ''),
+            fullKey: undefined
+          }
+
+          if (parent !== undefined) {
+            if (!theseLines[parent].children) theseLines[parent].children = []
+
+            theseLines[parent].children.push(line.id)
+          }
+
+          line.fullKey = getFullKey(line, theseLines)
+          line.rootParent = getRootParent(line, theseLines).id
+
+          if (parent === undefined) {
+            theseTypes[line.key] = true
+          }
+
+          theseLines[lineId] = line
         }
-
-        let parent = stack[stack.length - 2]
-
-        let line = {
-          data: parsedLine,
-          id: lineId,
-          filePath: filePath.replace(rootPath, ''),
-          root: rootKey,
-          lineNumber: lineNumber + 1,
-          depth,
-          parent: parent,
-          rootParent: undefined,
-          key: parsedLine[0].replace(/"/g, ''),
-          fullKey: undefined
-        }
-
-        if (parent !== undefined) {
-          if (!allLines[parent].children) allLines[parent].children = []
-
-          allLines[parent].children.push(line.id)
-        }
-
-        line.fullKey = getFullKey(line)
-        line.rootParent = getRootParent(line).id
-
-        if (parent === undefined) {
-          allTypes[line.key] = true
-        }
-
-        allLines[lineId] = line
-      }
+      })
     })
-  })
+  }
+  // `files` is an array of file paths
+
+  return { lines: theseLines, types: theseTypes }
 }
 
 // parse tokens according to the DataFormat
@@ -171,37 +144,44 @@ function tokenize(string) {
   return [depth, tokens]
 }
 
-function getFullKey(line) {
+function getFullKey(line, allLines) {
   let key = line.key
 
   if (line.parent !== undefined) {
-    return getFullKey(allLines[line.parent]) + '.' + key
+    return getFullKey(allLines[line.parent], allLines) + '.' + key
   }
   return key
 }
 
-function getRootParent(line) {
+function getRootParent(line, allLines) {
   if (line.parent !== undefined) {
-    return getRootParent(allLines[line.parent])
+    return getRootParent(allLines[line.parent], allLines)
   }
   return line
 }
 
+let once = false
 export default async function loadData() {
   id = 0
-  allLines = {}
-  allTypes = {}
-  roots = {}
+  let allLines = {}
+  let allTypes = {}
+  let config = getUpdateConfig()
+  let roots = Object.values(config.roots)
 
-  getRoots()
+  for (let index = 0, meta; (meta = roots[index]); index++) {
+    if (meta.isValid && meta.isActive) {
+      const data = await collectData(meta, allLines, allTypes)
 
-  try { await collectData('data') } catch (e) { /* ignore */ }
-  try { await collectData('steam') } catch (e) { /* ignore */ }
-  try { await collectData('plugins') } catch (e) { /* ignore */ }
-  try { await collectData('internalPlugins') } catch (e) { /* ignore */ }
+      if (data.error) meta.error = data.error
+      if (data.lines) allLines = { ...allLines,  ...data.lines }
+      if (data.types) allTypes = { ...allTypes, ...data.types }
+    }
+  }
 
-  console.log(Object.keys(allTypes).sort(), Object.keys(allTypes).length)
+  if (!once) {
+    once = true
+    console.log(Object.keys(allTypes).sort(), Object.keys(allTypes).length)
+  }
 
-  // fs.writeFileSync('./src/data.json', JSON.stringify({ lines: allLines, roots }, null, 2), 'utf-8')
   return JSON.stringify({ lines: allLines, roots })
 }

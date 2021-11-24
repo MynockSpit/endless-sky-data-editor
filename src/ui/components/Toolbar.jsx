@@ -1,11 +1,12 @@
 import { css } from '@emotion/css'
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Popup } from './Popup';
 import { Icon } from './Icon';
 import { Code } from './Code';
 import { useSearchNavigate } from '../utilities/misc';
 import _ from 'lodash'
 import { parseInput } from '../utilities/filter';
+import { setData, useData } from '../utilities/store';
 
 function resourceCount(inputLines) {
   let count = 0
@@ -45,12 +46,16 @@ export const Toolbar = ({ value, entries, loading }) => {
         />
         <div className={css`
           display: flex;
-          flex-direction: column;
+          flex-direction: row;
           justify-content: center;
+          align-items: center;
           margin: 0px 10px;
         `}>
+          <SettingsPopup>
+            <Icon className={css`font-size: 30px; margin-top: -3px; margin-right: 6px;`}>⚙</Icon>
+          </SettingsPopup>
           <HelpPopup>
-            <Icon>?</Icon>
+            <Icon border>?</Icon>
           </HelpPopup>
         </div>
       </div>
@@ -112,4 +117,77 @@ export const HelpPopup = ({ children }) => {
     </ul>
 
   </Popup>
+}
+
+export const SettingsPopup = ({ children }) => {
+  const [data, setData] = useData()
+
+  console.log({ data })
+
+  let dataEntrypoints = []
+  let pluginEntrypoints = []
+  data?.roots?.forEach(root => {
+    if (root.type === 'data') {
+      dataEntrypoints.push(root)
+    } else {
+      pluginEntrypoints.push(root)
+    }
+  })
+
+  return <Popup target={children} className={css`
+    width: 80vw;
+  `}>
+    <h4>Data</h4>
+    {dataEntrypoints.map(root => <ToggleRoot key={root.id} root={root} />)}
+
+    <button onClick={async () => {
+      await window.electron.updateDataPath('data')
+      setData(data => ({ roots: data.roots, loading: true }))
+    }}>Add data folder</button>
+
+    <h4>Plugins</h4>
+    {pluginEntrypoints.map(root => <ToggleRoot key={root.id} root={root} />)}
+
+    <button onClick={async () => {
+      await window.electron.updateDataPath('plugin')
+      setData(data => ({ roots: data.roots, loading: true }))
+    }}>Add plugin</button>
+  </Popup>
+}
+
+const ToggleRoot = ({ root }) => {
+  return <div className={css`
+    display: flex;
+  `}>
+    <input type="checkbox" checked={root.isActive} onChange={async () => {
+      setData(data => {
+        let newRoots = _.cloneDeep(data.roots)
+        _.set(newRoots, [root.path, 'isActive'], !_.get(newRoots, [root.path, 'isActive']))
+
+        return {
+          roots: newRoots,
+          loading: true,
+        }
+      })
+      window.electron.fireEvent('toggle-data-path', root.path)
+    }} />
+    <Code className={css`
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      overflow: hidden;
+      direction: rtl;
+    `} title={root.path}>{root.path}</Code>
+    <button onClick={async () => {
+      setData(data => {
+        let newRoots = _.cloneDeep(data.roots)
+        delete newRoots[data.roots]
+
+        return {
+          roots: newRoots,
+          loading: true,
+        }
+      })
+      window.electron.fireEvent('remove-data-path', root.path)
+    }}>remove</button>
+  </div>
 }

@@ -5,7 +5,7 @@ window.electron.onDataChange((event, data) => {
   setData(JSON.parse(data))
 })
 
-window.electron.requestData()
+window.electron.updateData()
 
 export function getVisibleLines(filteredLines, visibleLines = []) {
   filteredLines.forEach(line => {

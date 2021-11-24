@@ -1,12 +1,12 @@
-import { css } from "@emotion/css"
-import React from "react"
-import { Link } from "react-router-dom"
-import { Icon } from "../Icon"
-import { Popup } from "../Popup"
-import { getSearchUrl } from "../../utilities/misc"
-import { setInput, useData, useLineMeta } from "../../utilities/store"
+import { css } from '@emotion/css'
+import React from 'react'
+import { Link } from 'react-router-dom'
+import { Icon } from '../Icon'
+import { Popup } from '../Popup'
+import { getSearchUrl } from '../../utilities/misc'
+import { setInput, useData, useLineMeta } from '../../utilities/store'
 import ReactList from 'react-list';
-import { Code } from "../Code"
+import { Code } from '../Code'
 
 export const Entries = ({ entries }) => {
   return <ReactList
@@ -59,8 +59,8 @@ const GenericEntry = ({ line }) => {
         })}
       </div>
       <div className={css` margin: 2px 4px; flex-shrink: 0; `}>
-        <a href={`vscode://file/${data.roots[line.root]}${line.filePath}:${line.lineNumber}`}>{line.filePath}:{line.lineNumber}</a> ({line.root})
-        <Popup target={<Icon>?</Icon>} className={css`margin-left: 4px;`}>
+        <a href={`vscode://file/${data.roots[line.root].path}${line.filePath}:${line.lineNumber}`}>{line.filePath}:{line.lineNumber}</a> ({data.roots[line.root].type})
+        <Popup target={<Icon border>?</Icon>} className={css`margin-left: 4px;`}>
           <p>
             <Code block>
               {JSON.stringify(line, null, 2)}
@@ -101,9 +101,9 @@ const Foldable = ({ open = false, show = false, setOpen }) => {
   if (!show) {
     return <div className={css`width: 20px; flex-shrink: 0;`}></div>
   } else if (open === true) {
-    return <pre className={classy} onClick={() => { setOpen(false) }}>{"v"}</pre>
+    return <pre className={classy} onClick={() => { setOpen(false) }}>{'v'}</pre>
   } else {
-    return <pre className={classy} onClick={() => { setOpen(true) }}>{">"}</pre>
+    return <pre className={classy} onClick={() => { setOpen(true) }}>{'>'}</pre>
   }
 }
 
@@ -118,7 +118,7 @@ function getSearchMaker(line) {
     // not linkable
 
     // 'conversation'
-    "conversation": (conversation, name) => name ? `#conversation=${name}` : '',
+    'conversation': (conversation, name) => name ? `#conversation=${name}` : '',
     // conversation seems hard to link without being able to scroll to a specific line/collapse non-relevant lines
 
     // 'effect'
@@ -126,16 +126,16 @@ function getSearchMaker(line) {
 
     // 'fleet'
     // https://github.com/endless-sky/endless-sky/wiki/CreatingFleets
-    "fleet": (fleet, name) => name ? `#fleet=${name}` : '',
-    "fleet.government": (government, name) => name ? `#government=${name}` : '',
-    "fleet.names": (names, phrase) => phrase ? `#phrase=${phrase}` : '',
-    "fleet.fighters": (fighters, phrase) => phrase ? `#phrase=${phrase}` : '',
+    'fleet': (fleet, name) => name ? `#fleet=${name}` : '',
+    'fleet.government': (government, name) => name ? `#government=${name}` : '',
+    'fleet.names': (names, phrase) => phrase ? `#phrase=${phrase}` : '',
+    'fleet.fighters': (fighters, phrase) => phrase ? `#phrase=${phrase}` : '',
     // "fleet.cargo": value => ``, // not linkable
     // "fleet.commodities": value => ``, // not linkable yet b/c all "trade" is in one block
-    "fleet.outfitters": (outfitters, ...outfitter) => first(outfitter) ? `#outfitter=${first(outfitter)}` : '',
+    'fleet.outfitters': (outfitters, ...outfitter) => first(outfitter) ? `#outfitter=${first(outfitter)}` : '',
     // "fleet.personality": value => ``, // not linkable
     // "fleet.personality.*": value => ``, // not linkable
-    "fleet.variant.*": (ship) => ship ? `#ship=${ship}` : '',
+    'fleet.variant.*': (ship) => ship ? `#ship=${ship}` : '',
 
     // 'galaxy'
     // 'government'
@@ -153,12 +153,12 @@ function getSearchMaker(line) {
     // 'rating'
 
     // 'ship'
-    "ship": (ship, name, alternate) => (name || alternate) ? `#ship=${name || alternate}` : '',
-    "ship.attributes.category": (category, type) => type ? `#ship .category=${type}` : '',
-    "ship.outfits.*": (outfit) => outfit ? `#outfit=${outfit}` : '',
-    "ship.explode": (explode, effect) => effect ? `#effect=${effect}` : '',
-    "ship.final explode": (explode, effect) => effect ? `#effect=${effect}` : '',
-    "ship.leak": (leak, effect) => effect ? `#effect=${effect}` : '',
+    'ship': (ship, name, alternate) => (name || alternate) ? `#ship=${name || alternate}` : '',
+    'ship.attributes.category': (category, type) => type ? `#ship .category=${type}` : '',
+    'ship.outfits.*': (outfit) => outfit ? `#outfit=${outfit}` : '',
+    'ship.explode': (explode, effect) => effect ? `#effect=${effect}` : '',
+    'ship.final explode': (explode, effect) => effect ? `#effect=${effect}` : '',
+    'ship.leak': (leak, effect) => effect ? `#effect=${effect}` : '',
 
     // 'shipyard'
     // 'star'

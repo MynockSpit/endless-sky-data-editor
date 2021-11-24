@@ -21,4 +21,4 @@ export const [useLineMeta, setLineMeta, getLineMeta] = makeStateHook({
   // [id]: { show: true }
 })
 
-export const [useData, setData, getData] = makeStateHook({ loading: true, roots: {}, lines: [] })
+export const [useData, setData, getData] = makeStateHook({ loading: true, roots: [], lines: [] })

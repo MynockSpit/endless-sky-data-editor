@@ -174,7 +174,7 @@ export function getFilteredLines(filter, data) {
   let parentLinesMatches = {}
   let linesThatMatch = {}
 
-  if (!filter) linesDisplayed = Object.values(data.lines).filter(line => !line.parent)
+  if (!filter) linesDisplayed = Object.values(data?.lines ?? []).filter(line => !line.parent)
   else {
 
     // convert the input into 
