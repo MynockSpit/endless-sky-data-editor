@@ -183,5 +183,8 @@ export default async function loadData() {
     console.log(Object.keys(allTypes).sort(), Object.keys(allTypes).length)
   }
 
+  // uncomment this line to write out the data file
+  // fs.writeFileSync(`${__dirname}/../data.json`, JSON.stringify({ lines: allLines, roots }, null, 2))
+
   return JSON.stringify({ lines: allLines, roots })
 }

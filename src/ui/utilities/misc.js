@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+import { nullProxy } from './proxyify';
 import { setInput } from './store';
 
 export function getSearchUrl(query) {
@@ -19,5 +20,17 @@ export function useSearchNavigate() {
     console.log({url, query})
     navigate(url, { replace })
     setInput(query)
+  }
+}
+
+export function isElectron() {
+  return Boolean(window.electron)
+}
+
+export function safeElectron() {
+  if (isElectron()) {
+    return window.electron
+  } else {
+    return nullProxy()
   }
 }

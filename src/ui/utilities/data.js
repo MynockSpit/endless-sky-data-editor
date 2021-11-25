@@ -1,11 +1,18 @@
 import _ from 'lodash'
+import { isElectron, safeElectron } from './misc'
 import { getData, getLineMeta, setData } from './store'
 
-window.electron.onDataChange((event, data) => {
-  setData(JSON.parse(data))
-})
+if (isElectron()) {
+  safeElectron().onDataChange((event, data) => {
+    setData(JSON.parse(data))
+  })
 
-window.electron.updateData()
+  safeElectron().updateData()
+} else {
+  import('../data.json').then(data => {
+    console.log(data)
+  })
+}
 
 export function getVisibleLines(filteredLines, visibleLines = []) {
   filteredLines.forEach(line => {

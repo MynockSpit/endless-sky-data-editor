@@ -1,7 +1,7 @@
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
-import _ from 'lodash'
+import _ from 'lodash';
 
 function validateRoots(roots) {
   Object.entries(roots).forEach(([path, meta]) => {

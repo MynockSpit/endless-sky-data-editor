@@ -11,6 +11,7 @@ node_modules/
 
 # Webpack
 .webpack/
+/dist
 
 # Electron-Forge
 out/

@@ -6,7 +6,7 @@ import { Code } from './Code';
 import { useSearchNavigate } from '../utilities/misc';
 import _ from 'lodash'
 import { parseInput } from '../utilities/filter';
-import { setData, useData } from '../utilities/store';
+import { SettingsPopup } from './Settings';
 
 function resourceCount(inputLines) {
   let count = 0
@@ -117,77 +117,4 @@ export const HelpPopup = ({ children }) => {
     </ul>
 
   </Popup>
-}
-
-export const SettingsPopup = ({ children }) => {
-  const [data, setData] = useData()
-
-  console.log({ data })
-
-  let dataEntrypoints = []
-  let pluginEntrypoints = []
-  data?.roots?.forEach(root => {
-    if (root.type === 'data') {
-      dataEntrypoints.push(root)
-    } else {
-      pluginEntrypoints.push(root)
-    }
-  })
-
-  return <Popup target={children} className={css`
-    width: 80vw;
-  `}>
-    <h4>Data</h4>
-    {dataEntrypoints.map(root => <ToggleRoot key={root.id} root={root} />)}
-
-    <button onClick={async () => {
-      await window.electron.updateDataPath('data')
-      setData(data => ({ roots: data.roots, loading: true }))
-    }}>Add data folder</button>
-
-    <h4>Plugins</h4>
-    {pluginEntrypoints.map(root => <ToggleRoot key={root.id} root={root} />)}
-
-    <button onClick={async () => {
-      await window.electron.updateDataPath('plugin')
-      setData(data => ({ roots: data.roots, loading: true }))
-    }}>Add plugin</button>
-  </Popup>
-}
-
-const ToggleRoot = ({ root }) => {
-  return <div className={css`
-    display: flex;
-  `}>
-    <input type="checkbox" checked={root.isActive} onChange={async () => {
-      setData(data => {
-        let newRoots = _.cloneDeep(data.roots)
-        _.set(newRoots, [root.path, 'isActive'], !_.get(newRoots, [root.path, 'isActive']))
-
-        return {
-          roots: newRoots,
-          loading: true,
-        }
-      })
-      window.electron.fireEvent('toggle-data-path', root.path)
-    }} />
-    <Code className={css`
-      white-space: nowrap;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      direction: rtl;
-    `} title={root.path}>{root.path}</Code>
-    <button onClick={async () => {
-      setData(data => {
-        let newRoots = _.cloneDeep(data.roots)
-        delete newRoots[data.roots]
-
-        return {
-          roots: newRoots,
-          loading: true,
-        }
-      })
-      window.electron.fireEvent('remove-data-path', root.path)
-    }}>remove</button>
-  </div>
 }
