@@ -6,15 +6,15 @@ import { getVisibleLines } from './utilities/data'
 import { Entries } from './components/entries/Entries'
 import { getInput, setInput, useData, useInput, useLineMeta } from './utilities/store';
 import { Toolbar } from './components/Toolbar'
-import { BrowserRouter, MemoryRouter, useSearchParams } from 'react-router-dom';
+import { BrowserRouter, useSearchParams } from 'react-router-dom';
 
 const LocationInterceptor = () => {
   const [searchParams] = useSearchParams()
 
   useEffect(() => {
     let search = searchParams.get('search')
-    if (getInput !== search) {
-      setInput(search)
+    if (getInput() !== search) {
+      setInput(search || '')
     }
   }, [searchParams]);
 
@@ -30,17 +30,14 @@ const App = () => {
   let filteredLines = useMemo(() => getFilteredLines(inputValue, data), [inputValue, data])
   let visibleLines = getVisibleLines(filteredLines)
 
-  // hard-code for now, but we should figure out what we need to determine if we're in electron or a browser
-  let isBrowser = false
-  let Router = isBrowser ? BrowserRouter : MemoryRouter
-
-  return <Router>
-    { isBrowser && <LocationInterceptor /> }
+  // At some point in the past, I thought I needed MemoryRouter for electron. But I don't know why, 'cause it seems to work without it now.
+  return <BrowserRouter>
+    <LocationInterceptor />
     <div>
       <Toolbar value={inputValue} entries={filteredLines} loading={data.loading} />
       <Entries entries={visibleLines} loading={data.loading} />
     </div>
-  </Router>
+  </BrowserRouter>
 }
 
 ReactDOM.render(<App />, document.querySelector('#root'))

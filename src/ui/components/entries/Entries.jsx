@@ -32,6 +32,8 @@ const GenericEntry = ({ line }) => {
 
   let realOpen = open !== undefined ? open : (line.parent === undefined ? false : true)
 
+  let searchArray = getSearchLink(line)
+
   return <>
     <div className={css`display: flex; justify-content: space-between;`}>
       <div className={css`display: flex;`}>
@@ -39,14 +41,7 @@ const GenericEntry = ({ line }) => {
         <Foldable show={line.children && line.children.length} open={realOpen} setOpen={setOpen} />
         {line.data.map((entry, index) => {
 
-          let searchMaker = getSearchMaker(line)
-          let search = ''
-
-          if (searchMaker) {
-            let entries = new Array(index + 1).fill('')
-            entries[index] = entry
-            search = searchMaker(...entries)
-          }
+          let search = searchArray ? searchArray[index] : ''
 
           return <div key={entry + index} className={css`border: 0; margin: 2px 4px;`}>
             {search ? (
@@ -107,11 +102,28 @@ const Foldable = ({ open = false, show = false, setOpen }) => {
   }
 }
 
-function first(array) {
-  return array.find(item => item)
+function map(config) {
+  return (...args) => {
+    return args.map((value, index, allValues) => {
+      if (config.skip) {
+        if (typeof config.skip === 'string') {
+          if (value === config.skip) return null
+        } else if (typeof config.skip === 'number') {
+          if (index === config.skip) return null
+        } else if (typeof config.skip === 'function') {
+          if (config.skip(value, index)) return null
+        }
+      }
+      return config.each(value, index, allValues)
+    })
+  }
 }
 
-function getSearchMaker(line) {
+function skipLabel(fn) {
+  return map({ skip: 1, each: fn })
+}
+
+function getSearchLink(line) {
   let matches = {
 
     // 'color'
@@ -120,52 +132,53 @@ function getSearchMaker(line) {
     // 'conversation'
     // https://github.com/endless-sky/endless-sky/wiki/WritingConversations
     // Conversations seem hard to link without being able to scroll to a specific line/collapse non-relevant lines
-    'conversation': (conversation, name) => name ? `#conversation=${name}` : '',
+    'conversation': (conversation, name) => ([null, `#conversation=${name}`]),
 
     // 'effect'
     // https://github.com/endless-sky/endless-sky/wiki/CreatingEffects
     // I think there's not much here to link. Maybe sprite if we ever do that?
-    'effect': (effect, name) => name ? `#effect=${name}` : '',
+    'effect': (label, name) => ([null, `#effect=${name}`]),
 
     // 'event'
     // https://github.com/endless-sky/endless-sky/wiki/CreatingEvents
     // event kinda sucks, because each .property can have it's own nested attributes that are the same as #property. For now, we'll just do the basics.
-    'event': (event, name) => name ? `#event=${name}` : '',
-    'event.visit': (visit, system) => system ? `#system=${system}` : '',
-    'event.unvisit': (unvisit, system) => system ? `#system=${system}` : '',
-    'event.visit planet': (visitPlanet, planet) => planet ? `#planet=${planet}` : '',
-    'event.unvisit planet': (unvisitPlanet, planet) => planet ? `#planet=${planet}` : '',
-    'event.galaxy': (galaxy, name) => name ? `#galaxy=${name}` : '',
+    'event': (label, name) => ([null, `#event=${name}`]),
+    'event.visit': (label, system) => ([null, `#system=${system}`]),
+    'event.unvisit': (label, system) => ([null, `#system=${system}`]),
+    'event.visit planet': (label, planet) => ([null, `#planet=${planet}`]),
+    'event.unvisit planet': (label, planet) => ([null, `#planet=${planet}`]),
+    'event.galaxy': (label, name) => ([null, `#galaxy=${name}`]),
     // TODO: fill out galaxy sub-characteristics
-    'event.system': (system, name) => name ? `#system=${name}` : '',
+    'event.system': (label, name) => ([null, `#system=${name}`]),
     // TODO: fill out system sub-characteristics
-    'event.link': (title, system, other) => (other || system) ? `$system=${other || system}` : '',
-    'event.unlink': (title, system, other) => (other || system) ? `$system=${other || system}` : '',
-    'event.government': (government, name) => name ? `#government=${name}` : '',
+    'event.link': (label, system, other) => (other || system) ? `$system=${other || system}` : '',
+    'event.unlink': (label, system, other) => (other || system) ? `$system=${other || system}` : '',
+    'event.government': (label, government) => ([null, `#government=${government}`]),
     // TODO: fill out government sub-characteristics
-    'event.fleet': (fleet, name) => name ? `#fleet=${name}` : '',
+    'event.fleet': (label, fleet) => ([null, `#fleet=${fleet}`]),
     // TODO: fill out fleet sub-characteristics
-    'event.planet': (planet, name) => name ? `#planet=${name}` : '',
+    'event.planet': (label, planet) => ([null, `#planet=${planet}`]),
     // TODO: fill out planet sub-characteristics
-    'event.news': (news, name) => name ? `#news=${name}` : '',
+    'event.news': (label, news) => ([null, `#news=${news}`]),
     // TODO: fill out news sub-characteristics
-    'event.shipyard': (shipyard, name) => name ? `#shipyard=${name}` : '',
+    'event.shipyard': (label, shipyard) => ([null, `#shipyard=${shipyard}`]),
     // TODO: fill out shipyard sub-characteristics
-    'event.outfitter': (outfitter, name) => name ? `#outfitter=${name}` : '',
+    'event.outfitter': (label, outfitter) => ([null, `#outfitter=${outfitter}`]),
     // TODO: fill out outfitter sub-characteristics
     // substitutions?
-    // 'event.substitutions': (substitutions, name) => name ? `#substitutions=${name}` : '',
+    // 'event.substitutions': (substitutions, name) => ([ null, `#substitutions=${name}` ]),
     // TODO: fill out substitutions sub-characteristics
 
     // 'fleet'
     // https://github.com/endless-sky/endless-sky/wiki/CreatingFleets
     // TODO: link to commodities one day
-    'fleet': (fleet, name) => name ? `#fleet=${name}` : '',
-    'fleet.government': (government, name) => name ? `#government=${name}` : '',
-    'fleet.names': (names, phrase) => phrase ? `#phrase=${phrase}` : '',
-    'fleet.fighters': (fighters, phrase) => phrase ? `#phrase=${phrase}` : '',
-    'fleet.outfitters': (outfitters, ...outfitter) => first(outfitter) ? `#outfitter=${first(outfitter)}` : '',
-    'fleet.variant.*': (ship) => ship ? `#ship=${ship}` : '',
+    'fleet': (label, fleet) => ([null, `#fleet=${fleet}`]),
+    'fleet.government': (label, government) => ([null, `#government=${government}`]),
+    'fleet.names': (label, phrase) => ([null, `#phrase=${phrase}`]),
+    'fleet.fighters': (label, phrase) => ([null, `#phrase=${phrase}`]),
+    // 'fleet.outfitters': (label, ...outfitter) => first(outfitter) ? `#outfitter=${first(outfitter)}` : '',
+    'fleet.outfitters': skipLabel( name => `#outfitter=${name}` ),
+    'fleet.variant.*': (ship) => ([null, `#ship=${ship}`]),
 
     // 'galaxy'
     // 'government'
@@ -183,12 +196,12 @@ function getSearchMaker(line) {
     // 'rating'
 
     // 'ship'
-    'ship': (ship, name, alternate) => (name || alternate) ? `#ship=${name || alternate}` : '',
-    'ship.attributes.category': (category, type) => type ? `#ship .category=${type}` : '',
-    'ship.outfits.*': (outfit) => outfit ? `#outfit=${outfit}` : '',
-    'ship.explode': (explode, effect) => effect ? `#effect=${effect}` : '',
-    'ship.final explode': (explode, effect) => effect ? `#effect=${effect}` : '',
-    'ship.leak': (leak, effect) => effect ? `#effect=${effect}` : '',
+    'ship': skipLabel( name => `#ship=${name}` ),
+    'ship.attributes.category': (label, category) => ([ null, `#ship .category=${category}` ]),
+    'ship.outfits.*': (outfit) => ([null, `#outfit=${outfit}`]),
+    'ship.explode': (label, effect) => ([null, `#effect=${effect}`]),
+    'ship.final explode': (label, effect) => ([null, `#effect=${effect}`]),
+    'ship.leak': (label, effect) => ([null, `#effect=${effect}`]),
 
     // 'shipyard'
     // 'star'
@@ -202,7 +215,11 @@ function getSearchMaker(line) {
 
   let match = matches[keys.find(key => matches[key])]
 
-  return match
+  if (match) {
+    return match(...line.data)
+  } else {
+    return null
+  }
 }
 
 function getAllLevelsOfSpecificity(key) {

@@ -3,10 +3,11 @@ import React, { useEffect, useState } from 'react'
 import { Popup } from './Popup';
 import { Icon } from './Icon';
 import { Code } from './Code';
-import { useSearchNavigate } from '../utilities/misc';
+import { isElectron, useSearchNavigate } from '../utilities/misc';
 import _ from 'lodash'
 import { parseInput } from '../utilities/filter';
 import { SettingsPopup } from './Settings';
+import { useNavigate } from 'react-router';
 
 function resourceCount(inputLines) {
   let count = 0
@@ -17,7 +18,8 @@ function resourceCount(inputLines) {
 }
 
 export const Toolbar = ({ value, entries, loading }) => {
-  const navigate = useSearchNavigate()
+  const navigateToQuery = useSearchNavigate()
+  const navigate = useNavigate()
 
   return (
     <div className={css`
@@ -30,6 +32,12 @@ export const Toolbar = ({ value, entries, loading }) => {
       <div className={css`
         display: flex;
       `}>
+        {isElectron() && (
+          <>
+            <button className={css`border: 0; margin-right: 6px;`} onClick={() => navigate(-1)}>{'<'}</button>
+            <button className={css`border: 0; margin-right: 6px;`} onClick={() => navigate(1)}>{'>'}</button>
+          </>
+        )}
         <input
           className={css`
             width: -webkit-fill-available;
@@ -41,7 +49,7 @@ export const Toolbar = ({ value, entries, loading }) => {
           type="search"
           value={value}
           onChange={({ target }) => {
-            navigate(target.value)
+            navigateToQuery(target.value)
           }}
         />
         <div className={css`

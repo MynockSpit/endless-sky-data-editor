@@ -9,9 +9,10 @@ if (isElectron()) {
 
   safeElectron().updateData()
 } else {
-  import('../data.json').then(data => {
-    console.log(data)
-  })
+  // comment this out for now
+  // import('../data.json').then(data => {
+  //   console.log(data)
+  // })
 }
 
 export function getVisibleLines(filteredLines, visibleLines = []) {

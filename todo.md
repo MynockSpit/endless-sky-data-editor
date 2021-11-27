@@ -4,11 +4,13 @@ high
   - [x] make a production build, make sure it works
   - [x] get github to auto-build the app
 - [x] provide some user-y way of describing the data source you want
-- [ ] fill out the link templates for the other 25 resource types
+- [-] fill out the link templates for the other 25 resource types
 - [ ] intercept CMD/CTRL + F to focus the search box
 - [ ] make this work:`.variant.*=Fury`
+- [x] add back/forward buttons for electron apps
 
 low
+- [ ] make back/forward buttons disable/enable based on how if they're able to be clicked
 - [ ] link entries to their respective documentation pages
 - [ ] allow user to make search case sensitive
 - [ ] make quotes work better (e.g. `foo bar'baz bing` currently groups as `["foo", "bar'baz bing"]` instead of `["foo", "bar'baz", "bing"]`)
