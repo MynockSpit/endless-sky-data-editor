@@ -118,7 +118,7 @@ function isValueCheck(string) {
 
 export function parseInput(string) {
   return tokenizeInput(string).map(inputBit => {
-    let sanitizedInputBit = inputBit.toLowerCase().replace(/\\?(["`])/g, '')
+    let sanitizedInputBit = inputBit.toLowerCase().replace(/\\?(["'`])/g, '')
     let valueCheck = isValueCheck(sanitizedInputBit)
     let furtherSanitizedInputBit = unescapeString(sanitizedInputBit)
 

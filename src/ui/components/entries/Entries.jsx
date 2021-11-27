@@ -118,23 +118,53 @@ function getSearchMaker(line) {
     // not linkable
 
     // 'conversation'
+    // https://github.com/endless-sky/endless-sky/wiki/WritingConversations
+    // Conversations seem hard to link without being able to scroll to a specific line/collapse non-relevant lines
     'conversation': (conversation, name) => name ? `#conversation=${name}` : '',
-    // conversation seems hard to link without being able to scroll to a specific line/collapse non-relevant lines
 
     // 'effect'
+    // https://github.com/endless-sky/endless-sky/wiki/CreatingEffects
+    // I think there's not much here to link. Maybe sprite if we ever do that?
+    'effect': (effect, name) => name ? `#effect=${name}` : '',
+
     // 'event'
+    // https://github.com/endless-sky/endless-sky/wiki/CreatingEvents
+    // event kinda sucks, because each .property can have it's own nested attributes that are the same as #property. For now, we'll just do the basics.
+    'event': (event, name) => name ? `#event=${name}` : '',
+    'event.visit': (visit, system) => system ? `#system=${system}` : '',
+    'event.unvisit': (unvisit, system) => system ? `#system=${system}` : '',
+    'event.visit planet': (visitPlanet, planet) => planet ? `#planet=${planet}` : '',
+    'event.unvisit planet': (unvisitPlanet, planet) => planet ? `#planet=${planet}` : '',
+    'event.galaxy': (galaxy, name) => name ? `#galaxy=${name}` : '',
+    // TODO: fill out galaxy sub-characteristics
+    'event.system': (system, name) => name ? `#system=${name}` : '',
+    // TODO: fill out system sub-characteristics
+    'event.link': (title, system, other) => (other || system) ? `$system=${other || system}` : '',
+    'event.unlink': (title, system, other) => (other || system) ? `$system=${other || system}` : '',
+    'event.government': (government, name) => name ? `#government=${name}` : '',
+    // TODO: fill out government sub-characteristics
+    'event.fleet': (fleet, name) => name ? `#fleet=${name}` : '',
+    // TODO: fill out fleet sub-characteristics
+    'event.planet': (planet, name) => name ? `#planet=${name}` : '',
+    // TODO: fill out planet sub-characteristics
+    'event.news': (news, name) => name ? `#news=${name}` : '',
+    // TODO: fill out news sub-characteristics
+    'event.shipyard': (shipyard, name) => name ? `#shipyard=${name}` : '',
+    // TODO: fill out shipyard sub-characteristics
+    'event.outfitter': (outfitter, name) => name ? `#outfitter=${name}` : '',
+    // TODO: fill out outfitter sub-characteristics
+    // substitutions?
+    // 'event.substitutions': (substitutions, name) => name ? `#substitutions=${name}` : '',
+    // TODO: fill out substitutions sub-characteristics
 
     // 'fleet'
     // https://github.com/endless-sky/endless-sky/wiki/CreatingFleets
+    // TODO: link to commodities one day
     'fleet': (fleet, name) => name ? `#fleet=${name}` : '',
     'fleet.government': (government, name) => name ? `#government=${name}` : '',
     'fleet.names': (names, phrase) => phrase ? `#phrase=${phrase}` : '',
     'fleet.fighters': (fighters, phrase) => phrase ? `#phrase=${phrase}` : '',
-    // "fleet.cargo": value => ``, // not linkable
-    // "fleet.commodities": value => ``, // not linkable yet b/c all "trade" is in one block
     'fleet.outfitters': (outfitters, ...outfitter) => first(outfitter) ? `#outfitter=${first(outfitter)}` : '',
-    // "fleet.personality": value => ``, // not linkable
-    // "fleet.personality.*": value => ``, // not linkable
     'fleet.variant.*': (ship) => ship ? `#ship=${ship}` : '',
 
     // 'galaxy'
