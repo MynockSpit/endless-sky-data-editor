@@ -9,8 +9,6 @@ import { isElectron, safeElectron } from '../utilities/misc';
 export const SettingsPopup = ({ children }) => {
   const [data, setData] = useData()
 
-  console.log({ data })
-
   let dataEntrypoints = []
   let pluginEntrypoints = []
   data?.roots?.forEach(root => {

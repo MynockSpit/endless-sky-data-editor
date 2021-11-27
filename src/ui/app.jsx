@@ -33,10 +33,8 @@ const App = () => {
   // At some point in the past, I thought I needed MemoryRouter for electron. But I don't know why, 'cause it seems to work without it now.
   return <BrowserRouter>
     <LocationInterceptor />
-    <div>
-      <Toolbar value={inputValue} entries={filteredLines} loading={data.loading} />
-      <Entries entries={visibleLines} loading={data.loading} />
-    </div>
+    <Toolbar value={inputValue} entries={filteredLines} loading={data.loading} />
+    <Entries entries={visibleLines} loading={data.loading} />
   </BrowserRouter>
 }
 

@@ -24,7 +24,8 @@ const createWindow = (): void => {
       preload: UI_PRELOAD_WEBPACK_ENTRY
       // if you want node integration, check this bug first
       // https://github.com/electron-userland/electron-forge/issues/2618
-    }
+    },
+    // titleBarStyle: 'hidden'
   });
 
   // and load the index.html of the app.

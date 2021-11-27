@@ -105,7 +105,7 @@ const Foldable = ({ open = false, show = false, setOpen }) => {
 function map(config) {
   return (...args) => {
     return args.map((value, index, allValues) => {
-      if (config.skip) {
+      if (config.skip !== undefined) {
         if (typeof config.skip === 'string') {
           if (value === config.skip) return null
         } else if (typeof config.skip === 'number') {
@@ -120,7 +120,7 @@ function map(config) {
 }
 
 function skipLabel(fn) {
-  return map({ skip: 1, each: fn })
+  return map({ skip: 0, each: fn })
 }
 
 function getSearchLink(line) {
@@ -178,7 +178,7 @@ function getSearchLink(line) {
     'fleet.fighters': (label, phrase) => ([null, `#phrase=${phrase}`]),
     // 'fleet.outfitters': (label, ...outfitter) => first(outfitter) ? `#outfitter=${first(outfitter)}` : '',
     'fleet.outfitters': skipLabel( name => `#outfitter=${name}` ),
-    'fleet.variant.*': (ship) => ([null, `#ship=${ship}`]),
+    'fleet.variant.*': (ship) => ([`#ship=${ship}`]),
 
     // 'galaxy'
     // 'government'

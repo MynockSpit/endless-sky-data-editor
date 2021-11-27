@@ -1,5 +1,5 @@
 import { css } from '@emotion/css'
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useRef } from 'react'
 import { Popup } from './Popup';
 import { Icon } from './Icon';
 import { Code } from './Code';
@@ -8,6 +8,7 @@ import _ from 'lodash'
 import { parseInput } from '../utilities/filter';
 import { SettingsPopup } from './Settings';
 import { useNavigate } from 'react-router';
+import { determineAC, updateACWeight } from '../utilities/store';
 
 function resourceCount(inputLines) {
   let count = 0
@@ -17,9 +18,66 @@ function resourceCount(inputLines) {
   return count
 }
 
+const Autocomplete = ({ inputRef, value, onChange, onAutocomplete, autocompleteValue }) => {
+  let untyped = autocompleteValue.replace(value, '')
+
+  return (
+    <div className={css`
+      width: -webkit-fill-available;
+    `}>
+      <div className={css`
+        position: absolute;
+        padding: 5px;
+        color: grey;
+        pointer-events: none;
+      `}>
+        <span className={css`color: transparent;`}>{value}</span>
+        <span>{untyped}</span>
+      </div>
+      <input
+        ref={inputRef}
+        className={css`
+          width: -webkit-fill-available;
+          padding: 4px;
+          font-size: 16px;
+          border: 1px solid black;
+          border-radius: 4px;
+        `}
+        type="search"
+        value={value}
+        onChange={onChange}
+        onKeyUp={event => {
+          if (event.key === 'Tab') {
+            if (onAutocomplete) onAutocomplete()
+          }
+        }}
+        onKeyDown={event => {
+          if (event.key === 'Tab') {
+            event.preventDefault()
+          }
+        }}
+      />
+    </div>
+  )
+}
+
 export const Toolbar = ({ value, entries, loading }) => {
   const navigateToQuery = useSearchNavigate()
   const navigate = useNavigate()
+
+  let acValue = determineAC(value)
+
+  // a real simple way to push all keypresses to the input
+  const input = useRef()
+  useEffect(() => {
+    function keydown() {
+      input.current.focus()
+    }
+    document.addEventListener('keydown', keydown)
+    return () => document.removeEventListener('keydown', keydown)
+  }, [])
+
+  let parsedInput = parseInput(value)
 
   return (
     <div className={css`
@@ -38,18 +96,17 @@ export const Toolbar = ({ value, entries, loading }) => {
             <button className={css`border: 0; margin-right: 6px;`} onClick={() => navigate(1)}>{'>'}</button>
           </>
         )}
-        <input
-          className={css`
-            width: -webkit-fill-available;
-            padding: 4px;
-            font-size: 16px;
-            border: 1px solid black;
-            border-radius: 4px;
-          `}
+        <Autocomplete
+          inputRef={input}
+          autocompleteValue={acValue}
           type="search"
           value={value}
           onChange={({ target }) => {
             navigateToQuery(target.value)
+          }}
+          onAutocomplete={() => {
+            navigateToQuery(acValue)
+            updateACWeight(acValue)
           }}
         />
         <div className={css`
@@ -70,7 +127,7 @@ export const Toolbar = ({ value, entries, loading }) => {
       {loading ? (
         <div className={css`margin: 5px;`}>Loading resources...</div>
       ) : (
-        <div className={css`margin: 5px;`}>{resourceCount(entries)} resources matching {parseInput(value).map((entry, index, all) => {
+        <div className={css`margin: 5px;`}>{resourceCount(entries)} resources matching {parsedInput.map((entry, index, all) => {
           let separator = all[index + 1] ? <b>AND </b> : ''
           if (entry.type === 'resource') {
             let matchesOrContains = entry.operator === '=' ? 'equals' : 'contains'

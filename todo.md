@@ -10,6 +10,9 @@ high
 - [x] add back/forward buttons for electron apps
 
 low
+- [x] add auto-complete functionality
+- [ ] make auto-complete better by supporting paths
+- [ ] make auto-complete better by supporting values (key=value) (as long as it repeats more than once?)
 - [ ] make back/forward buttons disable/enable based on how if they're able to be clicked
 - [ ] link entries to their respective documentation pages
 - [ ] allow user to make search case sensitive
