@@ -54,7 +54,7 @@ const GenericEntry = ({ line }) => {
         })}
       </div>
       <div className={css` margin: 2px 4px; flex-shrink: 0; `}>
-        <a href={`vscode://file/${data.roots[line.root].path}${line.filePath}:${line.lineNumber}`}>{line.filePath}:{line.lineNumber}</a> ({data.roots[line.root].type})
+        <a href={`vscode://file/${data.roots[line.root].path}${line.filePath}:${line.lineNumber}`}>{line.filePath}:{line.lineNumber}</a> ({data.roots[line.root].fileType})
         <Popup target={<Icon border>?</Icon>} className={css`margin-left: 4px;`}>
           <p>
             <Code block>
@@ -123,6 +123,14 @@ function skipLabel(fn) {
   return map({ skip: 0, each: fn })
 }
 
+function skip(size) {
+  return array(size, null)
+}
+
+function array(size, value) {
+  return new Array(size).fill(value)
+}
+
 function getSearchLink(line) {
   let matches = {
 
@@ -176,8 +184,7 @@ function getSearchLink(line) {
     'fleet.government': (label, government) => ([null, `#government=${government}`]),
     'fleet.names': (label, phrase) => ([null, `#phrase=${phrase}`]),
     'fleet.fighters': (label, phrase) => ([null, `#phrase=${phrase}`]),
-    // 'fleet.outfitters': (label, ...outfitter) => first(outfitter) ? `#outfitter=${first(outfitter)}` : '',
-    'fleet.outfitters': skipLabel( name => `#outfitter=${name}` ),
+    'fleet.outfitters': skipLabel(name => `#outfitter=${name}`),
     'fleet.variant.*': (ship) => ([`#ship=${ship}`]),
 
     // 'galaxy'
@@ -189,6 +196,12 @@ function getSearchLink(line) {
     // 'mission'
     // 'news'
     // 'outfit'
+    'outfit': (label, name) => ([ null, `#ship=${name}`]),
+    'outfit.category': (label, name) => ([ null, `#outfit .category=${name}`]),
+    'outfit.licenses.*': (license) => ([ `#outfit ${license}`]),
+    'outfit.ammo': (label, name) => ([null, `#outfit=${name}`]),
+    'outfit.weapon.ammo': (label, name) => ([null, `#outfit=${name}`]),
+    'outfit.weapon.submunition': (label, name) => ([null, `#outfit=${name}`]),
     // 'outfitter'
     // 'person'
     // 'phrase'
@@ -198,8 +211,11 @@ function getSearchLink(line) {
     // 'ship'
     'ship': skipLabel( name => `#ship=${name}` ),
     'ship.attributes.category': (label, category) => ([ null, `#ship .category=${category}` ]),
-    'ship.outfits.*': (outfit) => ([null, `#outfit=${outfit}`]),
+    'ship.attributes.licenses.*': (license) => ([ `#ship ${license}` ]),
+    'ship.outfits.*': (outfit) => ([`#outfit=${outfit}`]),
     'ship.explode': (label, effect) => ([null, `#effect=${effect}`]),
+    'ship.turret': (label, ...args) => ([...skip(args.length), `#outfit=${args[args.length - 1]}`]),
+    'ship.gun': (label, ...args) => ([...skip(args.length), `#outfit=${args[args.length - 1]}`]),
     'ship.final explode': (label, effect) => ([null, `#effect=${effect}`]),
     'ship.leak': (label, effect) => ([null, `#effect=${effect}`]),
 

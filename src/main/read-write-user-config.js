@@ -19,13 +19,13 @@ function validateRoots(roots) {
 
 let dataId = 0
 export function addPlugin(path, roots) {
-  let thing = { type: 'plugin', isActive: true, isValid: false, path, id: dataId++ }
+  let thing = { fileType: 'plugin', isActive: true, isValid: false, path, id: dataId++ }
   if (roots) roots[path] = thing
   return thing
 }
 
 export function addData(path, roots) {
-  let thing = { type: 'data', isActive: true, isValid: false, path, id: dataId++ }
+  let thing = { fileType: 'data', isActive: true, isValid: false, path, id: dataId++ }
   if (roots) roots[path] = thing
   return thing
 }
@@ -45,14 +45,14 @@ function getDefaultRoots() {
     let inGamePluginDirGen = installLocation => path.resolve(installLocation, '../EndlessSky.app/Contents/Resources/plugins')
 
     Object.entries(roots).forEach(([path, meta]) => {
-      if (meta.type === 'data') {
+      if (meta.fileType === 'data') {
         addPlugin(inGamePluginDirGen(path), roots)
       }
     })
 
   } else if (process.platform === 'win32') {
     // I don't use windows, so it only loads plugins until I can find someone with that info
-    // roots[''] = { type: 'data' }
+    // roots[''] = { fileType: 'data' }
 
     // handle the ES2Launcher somehow?
 
@@ -60,7 +60,7 @@ function getDefaultRoots() {
     addPlugin(`${os.homedir()}\\AppData\\Roaming\\endless-sky\\plugins\\`, roots)
   } else {
     // I don't use linux either, so, uh yeah. No idea
-    // roots[''] = { type: 'data' }
+    // roots[''] = { fileType: 'data' }
 
     // handle the ES2Launcher somehow?
 

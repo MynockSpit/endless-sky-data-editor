@@ -30,11 +30,12 @@ export function eachFile(filePath, file, rootMeta, theseLines, theseTypes) {
         id: lineId,
         filePath: filePath.replace(rootMeta.path, ''),
         root: rootMeta.id,
-        type: rootMeta.type,
+        fileType: rootMeta.fileType,
         lineNumber: lineNumber + 1,
         depth,
         parent: parent,
         rootParent: undefined,
+        resourceType: undefined,
         key: parsedLine[0].replace(/"/g, ''),
         fullKey: undefined
       }
@@ -46,7 +47,10 @@ export function eachFile(filePath, file, rootMeta, theseLines, theseTypes) {
       }
 
       line.fullKey = getFullKey(line, theseLines)
-      line.rootParent = getRootParent(line, theseLines).id
+      let rootParent = getRootParent(line, theseLines)
+      line.rootParent = rootParent.id
+      line.resourceType = rootParent.resourceType || line.key
+      line.propertyKey = getPropertyKey(line, theseLines)
 
       if (parent === undefined) {
         theseTypes[line.key] = true
@@ -124,13 +128,34 @@ function tokenize(string) {
   return [depth, tokens]
 }
 
-function getFullKey(line, allLines) {
+function getFullKeyParts(line, allLines) {
   let key = line.key
 
   if (line.parent !== undefined) {
-    return getFullKey(allLines[line.parent], allLines) + '.' + key
+    return [...getFullKeyParts(allLines[line.parent], allLines), key]
   }
-  return key
+  return [key]
+}
+
+function getFullKey(line, allLines) {
+  return getFullKeyParts(line, allLines).join('.')
+}
+
+function getPropertyKey(line, allLines) {
+  let [resourceType, ...propertyKeyParts] = getFullKeyParts(line, allLines)
+
+  return '.' + propertyKeyParts.map(item => {
+    let newItem = item
+      .replace(/^['"`]/, '')
+      .replace(/['"`]$/, '')
+      .trim()
+    if (/\s+/.test(newItem)) {
+      return `"${newItem}"`
+    } else {
+      return newItem
+    }
+  }
+  ).join('.')
 }
 
 function getRootParent(line, allLines) {

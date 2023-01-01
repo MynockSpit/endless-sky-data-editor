@@ -1,5 +1,5 @@
 import { css } from '@emotion/css'
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { Popup } from './Popup';
 import { Icon } from './Icon';
 import { Code } from './Code';
@@ -8,7 +8,8 @@ import _ from 'lodash'
 import { parseInput } from '../utilities/filter';
 import { SettingsPopup } from './Settings';
 import { useNavigate } from 'react-router';
-import { determineAC, updateACWeight } from '../utilities/store';
+import { updateACWeight, useFilteredAutocompleteList } from '../utilities/store';
+import { Autocomplete } from './Autocomplete';
 
 function resourceCount(inputLines) {
   let count = 0
@@ -18,60 +19,20 @@ function resourceCount(inputLines) {
   return count
 }
 
-const Autocomplete = ({ inputRef, value, onChange, onAutocomplete, autocompleteValue }) => {
-  let untyped = autocompleteValue.replace(value, '')
-
-  return (
-    <div className={css`
-      width: -webkit-fill-available;
-    `}>
-      <div className={css`
-        position: absolute;
-        padding: 5px;
-        color: grey;
-        pointer-events: none;
-      `}>
-        <span className={css`color: transparent;`}>{value}</span>
-        <span>{untyped}</span>
-      </div>
-      <input
-        ref={inputRef}
-        className={css`
-          width: -webkit-fill-available;
-          padding: 4px;
-          font-size: 16px;
-          border: 1px solid black;
-          border-radius: 4px;
-        `}
-        type="search"
-        value={value}
-        onChange={onChange}
-        onKeyUp={event => {
-          if (event.key === 'Tab') {
-            if (onAutocomplete) onAutocomplete()
-          }
-        }}
-        onKeyDown={event => {
-          if (event.key === 'Tab') {
-            event.preventDefault()
-          }
-        }}
-      />
-    </div>
-  )
-}
-
 export const Toolbar = ({ value, entries, loading }) => {
   const navigateToQuery = useSearchNavigate()
   const navigate = useNavigate()
 
-  let acValue = determineAC(value)
+  let autocompleteValues = useFilteredAutocompleteList(value)
 
   // a real simple way to push all keypresses to the input
   const input = useRef()
   useEffect(() => {
-    function keydown() {
-      input.current.focus()
+    function keydown(event) {
+      let modified = event.ctrlKey || event.metaKey || event.shiftKey || event.altKey
+      if (event.key.length === 1 && !modified) {
+        input.current.focus()
+      }
     }
     document.addEventListener('keydown', keydown)
     return () => document.removeEventListener('keydown', keydown)
@@ -98,15 +59,24 @@ export const Toolbar = ({ value, entries, loading }) => {
         )}
         <Autocomplete
           inputRef={input}
-          autocompleteValue={acValue}
+          autocompleteValues={autocompleteValues}
           type="search"
           value={value}
+          processAutocomplete={(selectedAutocomplete, value) => {
+            if (!selectedAutocomplete) return value
+
+            let items = parseInput(value)
+            let lastItem = items[items.length - 1]
+            let index = value.lastIndexOf(lastItem.raw)
+
+            return value.slice(0, index) + selectedAutocomplete
+          }}
           onChange={({ target }) => {
             navigateToQuery(target.value)
           }}
-          onAutocomplete={() => {
-            navigateToQuery(acValue)
-            updateACWeight(acValue)
+          onAutocomplete={(selectedValue) => {
+            navigateToQuery(selectedValue)
+            updateACWeight(selectedValue)
           }}
         />
         <div className={css`

@@ -1,3 +1,4 @@
+import { parseInput } from './filter'
 import { makeStateHook } from './stateHook'
 
 function getQuery(inputKey) {
@@ -23,44 +24,77 @@ export const [useLineMeta, setLineMeta, getLineMeta] = makeStateHook({
 
 export const [useData, setData, getData, subscribeToData] = makeStateHook({ loading: true, roots: [], lines: [] })
 
-export const [useAC, setAC, getAC] = makeStateHook({ string: '', map: [], weights: [] })
+export const [useAC, setAC, getAC] = makeStateHook({ list: [], map: [], weights: [] })
 
-subscribeToData(data => {
+export function updateAC(entries) {
   let acMap = {}
+  let allLines = getData().lines
+  let lines = flattenEntries(entries, allLines)
 
-  Object.values(data.lines).map((line, index) => {
+  Object.values(lines).map((line, index) => {
     if (!line.parent) {
       acMap[('#' + line.key)] = 0
+    } else {
+      acMap[line.propertyKey] = 0
     }
   })
 
-  let acString = buildAutocompleteString(acMap)
-
   setAC({
-    string: acString,
+    list: buildAutocomplete(acMap),
     map: acMap,
     weights: []
   })
-})
-
-function buildAutocompleteString(acMap) {
-  return ':' + Object
-    .entries(acMap)
-    .sort(([aKey, aWeight], [bKey, bWeight]) => {
-      return bWeight - aWeight || bKey.localeCompare(aKey)
-    })
-    .map(([key, weight]) => key).join(':')
 }
 
-export function determineAC(value) {
-  let allACs = getAC().string
-  let autocompleteValue = ''
-  if (value) {
-    let index = allACs.indexOf(':' + value)
-    let matchedValuePlus = allACs.slice(index + 1)
-    autocompleteValue = matchedValuePlus.slice(0, matchedValuePlus.indexOf(':'))
+function flattenEntries(entries, allLines) {
+  return entries.reduce((lines, entry) => {
+    lines.push(entry)
+    if (entry.children) {
+      lines.push(...flattenEntries(entry.children.map(child => allLines[child]), allLines))
+    }
+    return lines
+  }, [])
+}
+
+function buildAutocomplete(acMap) {
+  return Object
+    .entries(acMap)
+    .sort(([aKeyRaw, aWeight], [bKeyRaw, bWeight]) => {
+      let aKey = aKeyRaw.replace(/[`"']/g, '').toLowerCase()
+      let bKey = bKeyRaw.replace(/[`"']/g, '').toLowerCase()
+
+      if (aWeight !== 0 || bWeight !== 0) return bWeight - aWeight
+      if (aKey.includes(bKey)) return 1
+      if (bKey.includes(aKey)) return -1
+      return aKey.localeCompare(bKey)
+    })
+    .map(([key, weight]) => key) || []
+}
+
+function toMap(list, fn) {
+  return list.reduce((obj, item, index, array) => {
+    obj[fn(item, index, array)] = item
+    return obj
+  }, {})
+}
+
+export function useFilteredAutocompleteList(value) {
+  let [allACs] = useAC()
+  let allACsList = allACs.list
+  let matchedParts = parseInput(value)
+  let alreadyMatchedParts = toMap(matchedParts, item => item.raw)
+  let [full, start = '', lastPart] = value.match(/(.+\s+)?(.+)/) || []
+  if (matchedParts.length) {
+    let allAutocompleteValues = allACsList.filter(autocompleteValue => {
+      let inLastPart = autocompleteValue.startsWith(matchedParts[matchedParts.length - 1].raw)
+      let notAlreadyMatched = !alreadyMatchedParts[autocompleteValue]
+      return inLastPart && notAlreadyMatched
+    })
+    return allAutocompleteValues
   }
-  return autocompleteValue
+  else {
+    return []
+  }
 }
 
 export function updateACWeight(key) {
@@ -84,7 +118,7 @@ export function updateACWeight(key) {
       autocompletes.map[key] = weight--
     })
 
-    autocompletes.string = buildAutocompleteString(autocompletes.map)
+    autocompletes.list = buildAutocomplete(autocompletes.map)
 
     return autocompletes
   })

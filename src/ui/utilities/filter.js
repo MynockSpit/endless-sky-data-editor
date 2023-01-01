@@ -7,8 +7,8 @@ import { getData } from './store';
 // any trailing thing = any value
 
 // fleet FLEET_NAME           // .fleet*=FLEET_NAME             fleet=FLEET_NAME
-//   government GOV_NAME      // .fleet.government=GOV_NAME    fleet.government.* === GOV_NAME
-//   personality              // .personality~=nemesis    fleet.government
+//   government GOV_NAME      // .fleet.government=GOV_NAME     fleet.government.* === GOV_NAME
+//   personality              // .personality~=nemesis          fleet.government
 //     nemesis waiting        // .personality.*=nemesis  
 //   variant
 //     "Fury" 2
@@ -49,13 +49,11 @@ export function tokenizeInput(string) {
 
           if (isEndingToken) { // end group
             groupingChar = ''
-          } else { // or not
-            currentToken += char
           }
         }
-      } else {
-        currentToken += char
       }
+      // always add the grouping token back
+      currentToken += char
     }
 
     else {
@@ -75,8 +73,6 @@ function unescapeString(string) {
 }
 
 function isValueCheck(string) {
-  // let segments = 
-
   // separate the string
   let keyDone = false
   const segments = string.split('=').reduce((prior, seg) => {

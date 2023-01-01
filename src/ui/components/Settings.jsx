@@ -12,7 +12,7 @@ export const SettingsPopup = ({ children }) => {
   let dataEntrypoints = []
   let pluginEntrypoints = []
   data?.roots?.forEach(root => {
-    if (root.type === 'data') {
+    if (root.fileType === 'data') {
       dataEntrypoints.push(root)
     } else {
       pluginEntrypoints.push(root)
